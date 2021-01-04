@@ -1,0 +1,3 @@
+discord
+praw
+prawcore
