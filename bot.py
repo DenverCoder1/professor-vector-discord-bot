@@ -1,4 +1,6 @@
 import os
+import re
+
 import discord
 from dotenv import load_dotenv
 
@@ -84,10 +86,13 @@ def get_date(post):
     time = post.created_utc
     return datetime.datetime.fromtimestamp(time)
 
+
 def get_emoji(post):
-    default = "🧩"
+    '''return emoji based on keywords in title'''
+    default = "🧩"  # default if no keywords are found
     keywords = {
         "results": "📊",
+        "announcements": "📢"
     }
     for keyword in keywords.keys():
         if (keyword in str(post.title).lower()):
@@ -95,17 +100,38 @@ def get_emoji(post):
     else:
         return default
 
+
+def format_markdown(text):
+    '''apply replacements to markdown for better Discord readability'''
+    def format_headings(text):
+        '''substitute headings like `### title` with TITLE'''
+        def transform_title(match):
+            '''transform matched group to uppercase'''
+            return match.group(1).upper()
+        return re.sub(r"#+[ \t]*(.*?\n)", transform_title, text)
+
+    def format_links(text):
+        '''substitute links like `[link](url)` with `link (url)`'''
+        return re.sub(r"\[(.*?)\]\((.*?)\)", "\\1 (\\2)", text)
+
+    def remove_line_breaks(text):
+        '''remove line breaks like `----`'''
+        return re.sub(r"\s+[\-]{4,}\s+", "\n\n", text)
+
+    return format_headings(format_links(remove_line_breaks(text)))
+
+
 def build_message(post):
     '''build message from post'''
     # get url and selftext
     emoji = get_emoji(post)
     title = post.title
     url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}'
-    selftext = post.selftext
+    selftext = format_markdown(post.selftext)
     # trim text if over 1000 characters
     if (len(selftext) > 500):
-        selftext = post.selftext[:500] + '...'
-    return f"{emoji} | **{title}**\n\n{url}\n\n{selftext}"
+        selftext = selftext[:500] + '...'
+    return f"{emoji}  |  **{title}**\n\n{url}\n\n{selftext}"
 
 
 async def process_post(post):
