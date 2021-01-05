@@ -28,7 +28,7 @@ CLIENT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
 
 # Reddit feed settings
 CHECK_INTERVAL = 5  # seconds to wait before checking again
-SUBMISSION_LIMIT = 10  # number of submissions to check
+SUBMISSION_LIMIT = 5  # number of submissions to check
 
 # initialize praw reddit api
 reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET,
