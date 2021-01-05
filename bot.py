@@ -109,40 +109,39 @@ def get_date(post):
 
 def get_emoji(post):
     '''return emoji based on keywords in title'''
-    default = "🧩"  # default if no keywords are found
-    keywords = {
+    default_emoji = "🧩"  # default if no keywords are found
+    emoji = {
         "results": "📊",
         "announcements": "📢"
     }
-    for keyword in keywords.keys():
+    for keyword in emoji.keys():
         if (keyword in str(post.title).lower()):
-            return keywords[keyword]
-    else:
-        return default
+            return emoji[keyword]
+    return default_emoji
 
 
-def format_markdown(text):
-    '''apply replacements to markdown for better Discord readability'''
+def format_selftext(post):
+    '''format message based on post type'''
 
-    def format_headings(text):
-        '''substitute headings like `### title` with TITLE'''
-        def transform_title(match):
-            '''transform matched group to uppercase'''
-            return match.group(1).upper()
-        return re.sub(r"(?:^|(?<=\n))#+[ \t]*(.*?\n)", transform_title, text)
+    def format_markdown(text):
+        '''apply replacements to markdown for better Discord readability'''
 
-    return format_headings(text)
+        def format_headings(text):
+            '''substitute headings like `### title` with TITLE'''
+            def transform_title(match):
+                '''transform matched group to uppercase'''
+                return match.group(1).upper()
+            return re.sub(r"(?:^|(?<=\n))#+[ \t]*(.*?\n)", transform_title, text)
 
+        return format_headings(text)
 
-def build_message(post):
-    '''build message from post'''
-    # get url and selftext
-    emoji = get_emoji(post)
-    title = post.title
-    url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}'
-    selftext = post.selftext
-    # replace selftext with theme and table in announcements
-    if ("announcements" in post.title.lower()):
+    def trimText(text, limit=600):
+        '''trim text if over limit of characters'''
+        if (len(text) > limit):
+            return text[:limit] + '...'
+
+    def formatAnnouncementsPost(post):
+        '''display only theme and schedule in announcements'''
         selftext = ""
         # extract theme from post text
         themeMatch = re.findall(r"(The theme .*?: .*?)\n", post.selftext)
@@ -152,40 +151,71 @@ def build_message(post):
             r"(Puzzle \d)\|(\[.*?\]\(.*?\))\|(\[.*?\]\(.*?\))\|", post.selftext)
         for puzzle in puzzlesMatch:
             selftext += f"\n\n**{puzzle[0]}**\n{puzzle[1]} until {puzzle[2]}"
-    # tabulate points in results post
-    elif ("results" in post.title.lower()):
+        return selftext
+
+    def formatResultsPost(post):
+        '''tabulate points in results post and trim'''
+        selftext = post.selftext
         # find points in post text
         pointsMatch = re.findall(
             r"(?:Puzzle (\d+)|.*?Points)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
             post.selftext)
-        # table header
+        # create table header
         table = [
             '+-----+-----+-----+-----+-----+',
             '|  #  |  G  |  H  |  R  |  S  |',
             '+=====+=====+=====+=====+=====+',
         ]
-        # table body
+        # add table body
         for p in pointsMatch:
+            # number for puzzles, "+" for total row
             num = p[0] if len(p[0]) > 0 else "+"
-            bottom = '+=====+=====+=====+=====+=====+' if p == pointsMatch[-2] else '+-----+-----+-----+-----+-----+'
+            # double row for row before totals
+            divider = '+-----+-----+-----+-----+-----+' if p != pointsMatch[-2] else '+=====+=====+=====+=====+=====+'
+            # add table row
             table += [
                 f"|  {num}  |{p[1].rjust(4)} |{p[2].rjust(4)} |{p[3].rjust(4)} |{p[4].rjust(4)} |",
-                bottom
+                divider
             ]
         # replace markdown table
-        selftext = re.sub(r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n", "```\n" + "\n".join(table) + "\n```", selftext)
+        selftext = re.sub(
+            r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
+            "```\n" + "\n".join(table) + "\n```",
+            selftext)
         selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
-        # trim text if over 600 characters
-        if (len(selftext) > 600):
-            selftext = selftext[:600] + '...'
-    # puzzle or other post
-    else:
-        # trim text if over 600 characters
-        if (len(selftext) > 600):
-            selftext = selftext[:600] + '...'
+        # trim text if over limit of characters
+        trimLength = max(600, selftext.find("Level Results"))
+        selftext = trimText(selftext, trimLength)
+        return format_markdown(selftext)
+
+    def formatPuzzlePost(post):
+        '''trim puzzle post'''
+        # trim text if over limit of characters
+        selftext = trimText(post.selftext)
+        return format_markdown(selftext)
+
+    # format text
+    default_formatter = formatPuzzlePost
+    formatters = {
+        "announcements": formatAnnouncementsPost,
+        "results": formatResultsPost
+    }
+    for keyword in formatters.keys():
+        if (keyword in str(post.title).lower()):
+            return formatters[keyword](post)
+    return default_formatter(post)
+
+
+def build_message(post):
+    '''build message from post'''
+    # get url and selftext
+    emoji = get_emoji(post)
+    title = post.title
+    url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}'
+    selftext = format_selftext(post)
     # create the message
     title = f"{emoji}  |  **{title}**"
-    message = f"{url}\n\n{format_markdown(selftext)}"
+    message = f"{url}\n\n{selftext}"
     return title, message
 
 
