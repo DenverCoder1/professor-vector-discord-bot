@@ -3,6 +3,7 @@ import re
 import datetime
 import time
 
+import discord
 from dotenv import load_dotenv
 from discord.ext.tasks import loop
 from discord.ext.commands import Bot
@@ -27,7 +28,7 @@ CLIENT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
 
 # Reddit feed settings
 CHECK_INTERVAL = 5  # seconds to wait before checking again
-SUBMISSION_LIMIT = 3  # number of submissions to check
+SUBMISSION_LIMIT = 10  # number of submissions to check
 
 # initialize praw reddit api
 reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET,
@@ -38,6 +39,8 @@ reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET,
 async def on_ready():
     '''When discord is connected'''
     print(f'{client.user.name} has connected to Discord!')
+    # Start Reddit loop
+    reddit_feed.start()
 
 
 @client.event
@@ -62,10 +65,11 @@ async def resend(ctx):
         await process_post(submission)
 
 
-async def announce(message):
+async def announce(title, message):
     '''send message in announcements channel'''
     channel = client.get_channel(ANNOUCEMENTS_CHANNEL)
-    await channel.send(message)
+    embed = discord.Embed(title=title, description=message)
+    await channel.send(embed=embed)
 
 
 @loop(seconds=CHECK_INTERVAL)
@@ -125,17 +129,9 @@ def format_markdown(text):
         def transform_title(match):
             '''transform matched group to uppercase'''
             return match.group(1).upper()
-        return re.sub(r"#+[ \t]*(.*?\n)", transform_title, text)
+        return re.sub(r"(?:^|(?<=\n))#+[ \t]*(.*?\n)", transform_title, text)
 
-    def format_links(text):
-        '''substitute links like `[link](url)` with `link (url)`'''
-        return re.sub(r"\[(.*?)\]\((.*?)\)", "\\1 (\\2)", text)
-
-    def remove_line_breaks(text):
-        '''remove line breaks like `----`'''
-        return re.sub(r"\s+[\-]{4,}\s+", "\n\n", text)
-
-    return format_headings(format_links(remove_line_breaks(text)))
+    return format_headings(text)
 
 
 def build_message(post):
@@ -144,14 +140,53 @@ def build_message(post):
     emoji = get_emoji(post)
     title = post.title
     url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}'
-    selftext = format_markdown(post.selftext)
-    # trim text if over 500 characters
-    if (len(selftext) > 500):
-        selftext = selftext[:500] + '...'
-    # hide selftext in announcements
+    selftext = post.selftext
+    # replace selftext with theme and table in announcements
     if ("announcements" in post.title.lower()):
         selftext = ""
-    return f"{emoji}  |  **{title}**\n\n{url}\n\n{selftext}"
+        # extract theme from post text
+        themeMatch = re.findall(r"(The theme .*?: .*?)\n", post.selftext)
+        if (len(themeMatch) > 0):
+            selftext += themeMatch[0]
+        puzzlesMatch = re.findall(
+            r"(Puzzle \d)\|(\[.*?\]\(.*?\))\|(\[.*?\]\(.*?\))\|", post.selftext)
+        for puzzle in puzzlesMatch:
+            selftext += f"\n\n**{puzzle[0]}**\n{puzzle[1]} until {puzzle[2]}"
+    # tabulate points in results post
+    elif ("results" in post.title.lower()):
+        # find points in post text
+        pointsMatch = re.findall(
+            r"(?:Puzzle (\d+)|.*?Points)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
+            post.selftext)
+        # table header
+        table = [
+            '+-----+-----+-----+-----+-----+',
+            '|  #  |  G  |  H  |  R  |  S  |',
+            '+=====+=====+=====+=====+=====+',
+        ]
+        # table body
+        for p in pointsMatch:
+            num = p[0] if len(p[0]) > 0 else "+"
+            bottom = '+=====+=====+=====+=====+=====+' if p == pointsMatch[-2] else '+-----+-----+-----+-----+-----+'
+            table += [
+                f"|  {num}  |{p[1].rjust(4)} |{p[2].rjust(4)} |{p[3].rjust(4)} |{p[4].rjust(4)} |",
+                bottom
+            ]
+        # replace markdown table
+        selftext = re.sub(r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n", "```\n" + "\n".join(table) + "\n```", selftext)
+        selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
+        # trim text if over 600 characters
+        if (len(selftext) > 600):
+            selftext = selftext[:600] + '...'
+    # puzzle or other post
+    else:
+        # trim text if over 600 characters
+        if (len(selftext) > 600):
+            selftext = selftext[:600] + '...'
+    # create the message
+    title = f"{emoji}  |  **{title}**"
+    message = f"{url}\n\n{format_markdown(selftext)}"
+    return title, message
 
 
 async def process_post(post):
@@ -159,14 +194,11 @@ async def process_post(post):
     # log post details in console
     print(f"Recieved post by {post.author} at {get_date(post)}")
     # create message with url and text
-    message = build_message(post)
+    title, message = build_message(post)
     # send to discord announcements
-    await announce(message)
+    await announce(title, message)
     # log announcement status in console
     print(f"Sent announcement.")
-
-# Start Reddit loop
-reddit_feed.start()
 
 # Run Discord bot
 client.run(TOKEN)
