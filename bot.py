@@ -1,12 +1,12 @@
 import os
 import re
+import datetime
+import time
 
 import discord
 from dotenv import load_dotenv
 
 import praw
-import datetime
-import time
 from prawcore.exceptions import PrawcoreException
 import praw.exceptions
 
@@ -51,12 +51,11 @@ CLIENT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
 
 # Reddit feed settings
 CHECK_INTERVAL = 5  # seconds to wait before checking again
-SUBMISSION_LIMIT = 5  # number of submissions to check
+SUBMISSION_LIMIT = 3  # number of submissions to check
 
 # initialize praw
 reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET,
-                     password=PASSWORD, user_agent=f'{ME} Bot',
-                     username=ME)
+                     password=PASSWORD, user_agent=f'{ME} Bot', username=ME)
 
 
 async def begin_checking_reddit():
@@ -64,7 +63,7 @@ async def begin_checking_reddit():
     print(f"Logged in: {str(datetime.datetime.now())[:-7]}")
     print(f"Timezone: {time.tzname[time.localtime().tm_isdst]}")
     print(f"Subreddit: {SUB}")
-    print(f"Checking {SUBMISSION_LIMIT} posts every {CHECK_INTERVAL}s")
+    print(f"Checking {SUBMISSION_LIMIT} posts every {CHECK_INTERVAL} seconds")
     while True:
         try:
             # check for new submission in subreddit
@@ -103,6 +102,7 @@ def get_emoji(post):
 
 def format_markdown(text):
     '''apply replacements to markdown for better Discord readability'''
+
     def format_headings(text):
         '''substitute headings like `### title` with TITLE'''
         def transform_title(match):
@@ -128,7 +128,7 @@ def build_message(post):
     title = post.title
     url = f'https://www.reddit.com/r/{post.subreddit}/comments/{post.id}'
     selftext = format_markdown(post.selftext)
-    # trim text if over 1000 characters
+    # trim text if over 500 characters
     if (len(selftext) > 500):
         selftext = selftext[:500] + '...'
     return f"{emoji}  |  **{title}**\n\n{url}\n\n{selftext}"
@@ -140,12 +140,13 @@ async def process_post(post):
     if (not post.saved):
         # save post to mark as seen
         post.save()
+        # log post details in console
         print(f"Recieved post by {post.author} at {get_date(post)}")
         # create message with url and text
         message = build_message(post)
         # send to discord announcements
         await announce(message)
-        # log details in console
+        # log announcement status in console
         print(f"Sent announcement.")
 
 # Run Discord bot
