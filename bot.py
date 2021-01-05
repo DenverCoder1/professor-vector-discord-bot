@@ -16,7 +16,7 @@ load_dotenv()
 
 # Discord setup
 TOKEN = os.getenv('DISCORD_TOKEN')
-ANNOUCEMENTS_CHANNEL = int(os.getenv('DISCORD_ANNOUNCEMENTS'))
+ANNOUNCEMENTS_CHANNEL = int(os.getenv('DISCORD_ANNOUNCEMENTS'))
 client = Bot('!')
 
 # Reddit credentials
@@ -67,7 +67,7 @@ async def resend(ctx):
 
 async def announce(title, message):
     '''send message in announcements channel'''
-    channel = client.get_channel(ANNOUCEMENTS_CHANNEL)
+    channel = client.get_channel(ANNOUNCEMENTS_CHANNEL)
     embed = discord.Embed(title=title, description=message)
     await channel.send(embed=embed)
 
@@ -138,7 +138,10 @@ def format_selftext(post):
     def trimText(text, limit=600):
         '''trim text if over limit of characters'''
         if (len(text) > limit):
+            # trim text if over limit of characters
             return text[:limit] + '...'
+        # otherwise, return original
+        return text
 
     def formatAnnouncementsPost(post):
         '''display only theme and schedule in announcements'''
