@@ -7,6 +7,7 @@ import discord
 from dotenv import load_dotenv
 from discord.ext.tasks import loop
 from discord.ext.commands import Bot
+from discord.ext import commands
 
 import praw
 from prawcore.exceptions import PrawcoreException
@@ -54,6 +55,7 @@ async def on_error(event, *args, **kwargs):
 
 
 @client.command(pass_context=True)
+@commands.has_permissions(administrator=True)
 async def resend(ctx):
     # log command in console
     print("Received resend command")
