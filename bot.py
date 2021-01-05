@@ -17,6 +17,7 @@ load_dotenv()
 
 # Discord setup
 TOKEN = os.getenv('DISCORD_TOKEN')
+DISCORD_GUILD = int(os.getenv('DISCORD_GUILD'))
 ANNOUNCEMENTS_CHANNEL = int(os.getenv('DISCORD_ANNOUNCEMENTS'))
 client = Bot('!')
 
@@ -54,9 +55,19 @@ async def on_error(event, *args, **kwargs):
             f.write(f'Event: {event}\nMessage: {args}\n')
 
 
+def is_in_guild(guild_id):
+    '''check that command is in a guild'''
+    async def predicate(ctx):
+        return ctx.guild and ctx.guild.id == guild_id
+    return commands.check(predicate)
+
+
 @client.command(pass_context=True)
 @commands.has_permissions(administrator=True)
+@is_in_guild(DISCORD_GUILD)
 async def resend(ctx):
+    '''Command to resend the last post again.
+       Invoked with !resend'''
     # log command in console
     print("Received resend command")
     # respond to command
