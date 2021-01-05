@@ -3,44 +3,20 @@ import re
 import datetime
 import time
 
-import discord
 from dotenv import load_dotenv
+from discord.ext.tasks import loop
+from discord.ext.commands import Bot
 
 import praw
 from prawcore.exceptions import PrawcoreException
 import praw.exceptions
 
 load_dotenv()
+
+# Discord setup
 TOKEN = os.getenv('DISCORD_TOKEN')
 ANNOUCEMENTS_CHANNEL = int(os.getenv('DISCORD_ANNOUNCEMENTS'))
-
-client = discord.Client()
-
-
-@client.event
-async def on_ready():
-    '''When discord is connected'''
-    print(f'{client.user.name} has connected to Discord!')
-    # connect to reddit
-    await begin_checking_reddit()
-
-
-@client.event
-async def on_error(event, *args, **kwargs):
-    '''when an exception is raised'''
-    with open('err.log', 'a') as f:
-        if event == 'on_message':
-            f.write(f'Unhandled message: {args[0]}\n')
-        else:
-            f.write(f'Event: {event}\nMessage: {args[0]}\n')
-
-
-async def announce(message):
-    '''send message in announcements channel'''
-    channel = client.get_channel(ANNOUCEMENTS_CHANNEL)
-    await channel.send(message)
-
-# REDDIT FEED
+client = Bot('!')
 
 # Reddit credentials
 ME = os.getenv('REDDIT_USERNAME')
@@ -53,31 +29,72 @@ CLIENT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
 CHECK_INTERVAL = 5  # seconds to wait before checking again
 SUBMISSION_LIMIT = 3  # number of submissions to check
 
-# initialize praw
+# initialize praw reddit api
 reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET,
                      password=PASSWORD, user_agent=f'{ME} Bot', username=ME)
 
 
-async def begin_checking_reddit():
-    '''start reddit feed loop'''
+@client.event
+async def on_ready():
+    '''When discord is connected'''
+    print(f'{client.user.name} has connected to Discord!')
+
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    '''when an exception is raised'''
+    with open('err.log', 'a') as f:
+        if event == 'on_message':
+            f.write(f'Unhandled message: {args[0]}\n')
+        else:
+            f.write(f'Event: {event}\nMessage: {args}\n')
+
+
+@client.command(pass_context=True)
+async def resend(ctx):
+    # log command in console
+    print("Received resend command")
+    # respond to command
+    await ctx.send("Resending last announcement!")
+    # check for last submission in subreddit
+    for submission in reddit.subreddit(SUB).new(limit=1):
+        # process submission
+        await process_post(submission)
+
+
+async def announce(message):
+    '''send message in announcements channel'''
+    channel = client.get_channel(ANNOUCEMENTS_CHANNEL)
+    await channel.send(message)
+
+
+@loop(seconds=CHECK_INTERVAL)
+async def reddit_feed():
+    '''loop every few seconds to check for new submissions'''
+    try:
+        # check for new submission in subreddit
+        for submission in reddit.subreddit(SUB).new(limit=SUBMISSION_LIMIT):
+            # check if the post has been seen before
+            if (not submission.saved):
+                # save post to mark as seen
+                submission.save()
+                # process submission
+                await process_post(submission)
+    except PrawcoreException as err:
+        print(f"EXCEPTION: PrawcoreException. {err}")
+        time.sleep(10)
+    except Exception as err:
+        print(f"EXCEPTION: An error occured. {err}")
+        time.sleep(10)
+
+
+@reddit_feed.before_loop
+async def reddit_feed_init():
+    '''print startup info before reddit feed loop begins'''
     print(f"Logged in: {str(datetime.datetime.now())[:-7]}")
     print(f"Timezone: {time.tzname[time.localtime().tm_isdst]}")
     print(f"Subreddit: {SUB}")
     print(f"Checking {SUBMISSION_LIMIT} posts every {CHECK_INTERVAL} seconds")
-    while True:
-        try:
-            # check for new submission in subreddit
-            for submission in reddit.subreddit(SUB).new(limit=SUBMISSION_LIMIT):
-                # process submission
-                await process_post(submission)
-            # wait a few seconds before checking again
-            time.sleep(CHECK_INTERVAL)
-        except PrawcoreException as err:
-            print(f"EXCEPTION: PrawcoreException. {err}")
-            time.sleep(10)
-        except Exception as err:
-            print(f"EXCEPTION: An error occured. {err}")
-            time.sleep(10)
 
 
 def get_date(post):
@@ -131,23 +148,25 @@ def build_message(post):
     # trim text if over 500 characters
     if (len(selftext) > 500):
         selftext = selftext[:500] + '...'
+    # hide selftext in announcements
+    if ("announcements" in post.title.lower()):
+        selftext = ""
     return f"{emoji}  |  **{title}**\n\n{url}\n\n{selftext}"
 
 
 async def process_post(post):
     '''check post and announce if not saved'''
-    # check if the post has been seen before
-    if (not post.saved):
-        # save post to mark as seen
-        post.save()
-        # log post details in console
-        print(f"Recieved post by {post.author} at {get_date(post)}")
-        # create message with url and text
-        message = build_message(post)
-        # send to discord announcements
-        await announce(message)
-        # log announcement status in console
-        print(f"Sent announcement.")
+    # log post details in console
+    print(f"Recieved post by {post.author} at {get_date(post)}")
+    # create message with url and text
+    message = build_message(post)
+    # send to discord announcements
+    await announce(message)
+    # log announcement status in console
+    print(f"Sent announcement.")
+
+# Start Reddit loop
+reddit_feed.start()
 
 # Run Discord bot
 client.run(TOKEN)
