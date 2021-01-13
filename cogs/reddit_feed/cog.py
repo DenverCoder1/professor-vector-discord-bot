@@ -11,7 +11,7 @@ import praw
 from prawcore.exceptions import PrawcoreException
 import praw.exceptions
 
-from modules.reddit_feed.reddit_post import RedditPost
+from modules.reddit.reddit_post import RedditPost
 
 load_dotenv()
 
@@ -40,7 +40,8 @@ reddit = praw.Reddit(
 
 
 class RedditFeedCog(commands.Cog):
-	"""Checks for `resend` command and starts Reddit feed loop"""
+	"""Checks for `resend` command and starts Reddit feed loop to check submissions"""
+
 	def __init__(self, bot):
 		self.bot = bot
 
