@@ -11,7 +11,7 @@ import praw
 from prawcore.exceptions import PrawcoreException
 import praw.exceptions
 
-from modules.reddit.reddit_post import RedditPost
+from modules.reddit_feed.reddit_post import RedditPost
 
 load_dotenv()
 
