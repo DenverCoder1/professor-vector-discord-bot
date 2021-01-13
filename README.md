@@ -14,7 +14,7 @@ When a new submission is posted in r/Arithmancy, it will be shared in #announcem
 
 `!solved` - add the solved prefix to a channel name (ex. "channel" becomes "solved-channel")
 
-`!unsolved` - add the solved prefix to a channel name (ex. "solved-channel" becomes "channel")
+`!unsolved` - remove the solved prefix from a channel name (ex. "solved-channel" becomes "channel")
 
 ## Commands (Admin only)
 
