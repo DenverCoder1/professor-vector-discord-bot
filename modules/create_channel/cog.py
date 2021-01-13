@@ -1,4 +1,9 @@
+import os
+from dotenv.main import load_dotenv
 from discord.ext import commands
+
+load_dotenv()
+MYSTERY_HUNT_ROLE_ID = int(os.getenv("MYSTERY_HUNT_ROLE_ID"))
 
 
 class CreateChannelCog(commands.Cog):
@@ -9,6 +14,7 @@ class CreateChannelCog(commands.Cog):
 		self.bot = bot
 
 	@commands.command(name="createchannel")
+	@commands.has_role(MYSTERY_HUNT_ROLE_ID)
 	async def createchannel(self, ctx, arg: str = ""):
 		"""Command to create channel in same category with given name"""
 		# log command in console

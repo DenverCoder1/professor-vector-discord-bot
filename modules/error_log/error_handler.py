@@ -48,8 +48,8 @@ class ErrorHandler:
 			return f"That command is disabled or under maintenance."
 		elif isinstance(self.error, CommandInvokeError):
 			return f"Error while executing the command."
-		else:
-			pass
+		elif "Role" in str(self.error) and "is required" in str(self.error):
+			return self.error
 
 	def __log_to_file(self, filename: str, text: str):
 		"""appends the date and logs text to a file"""
