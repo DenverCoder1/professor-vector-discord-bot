@@ -15,19 +15,19 @@ class CreateChannelCog(commands.Cog):
 
 	@commands.command(name="createchannel")
 	@commands.has_role(MYSTERY_HUNT_ROLE_ID)
-	async def createchannel(self, ctx, arg: str = ""):
+	async def createchannel(self, ctx, name: str = ""):
 		"""Command to create channel in same category with given name"""
 		# log command in console
 		print("Received createchannel command")
 		# check for channel name argument
-		if arg != "":
+		if len(name) > 0:
 			# get guild and category
 			guild = ctx.message.guild
 			category = ctx.channel.category
 			# reply to user
-			await ctx.send(f"Creating channel {arg} in {category}!")
+			await ctx.send(f"Creating channel {name} in {category}!")
 			# create channel
-			await guild.create_text_channel(arg, category=category)
+			await guild.create_text_channel(name, category=category)
 		# no argument passed
 		else:
 			# reply to user
