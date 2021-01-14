@@ -6,7 +6,7 @@ Discord bot for r/Arithmancy - A reddit feed bot and more!
 
 When a new submission is posted in r/Arithmancy, it will be shared in #announcements
 
-## Commands (Mystery Hunt Role Only)
+## Commands (Archivist Role Only)
 
 `!createchannel <channel-name>` - create a channel with the given name in the same category
 
