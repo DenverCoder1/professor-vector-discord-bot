@@ -48,7 +48,11 @@ class ErrorHandler:
 			return f"That command is disabled or under maintenance."
 		elif isinstance(self.error, CommandInvokeError):
 			return f"Error while executing the command."
-		elif "Role" in str(self.error) and "is required" in str(self.error):
+		elif isinstance(self.error, MissingRole):
+			role_id = int("".join(filter(lambda x: x.isdigit(), str(self.error))))
+			if role_id and self.message and self.message.guild:
+				role_name = self.message.guild.get_role(role_id)
+				return f"{role_name} role is required to use this command."
 			return self.error
 
 	def __log_to_file(self, filename: str, text: str):
