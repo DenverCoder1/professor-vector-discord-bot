@@ -12,7 +12,6 @@ class CreateChannelCog(commands.Cog):
 
 	def __init__(self, bot):
 		self.bot = bot
-		self.is_nsfw = True
 
 	@commands.command(name="createchannel")
 	@commands.has_role(MYSTERY_HUNT_ROLE_ID)
@@ -28,7 +27,7 @@ class CreateChannelCog(commands.Cog):
 			# reply to user
 			await ctx.send(f"Creating channel {name} in {category}!")
 			# create channel
-			await guild.create_text_channel(name, category=category, nsfw=self.is_nsfw)
+			await guild.create_text_channel(name, category=category)
 		# no argument passed
 		else:
 			# reply to user
