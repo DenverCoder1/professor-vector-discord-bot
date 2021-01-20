@@ -22,13 +22,10 @@ class LockCategoryCog(commands.Cog, name="Lock Category"):
 			# get new category
 			category = discord.utils.get(ctx.guild.channels, name=category_name)
 			if category is not None:
-				# lock channel
-				overwrites = {
-					ctx.guild.default_role: discord.PermissionOverwrite(
-						send_messages=False,
-					)
-				}
-				await category.edit(overwrites=overwrites)
+				# lock category
+				await category.set_permissions(
+					ctx.guild.default_role, send_messages=False
+				)
 				# reply to user
 				await ctx.send(f"Locked {category}!")
 			else:
