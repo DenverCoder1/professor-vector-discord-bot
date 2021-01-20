@@ -3,7 +3,7 @@ from discord.ext import commands
 from modules.error_log.error_handler import ErrorHandler
 
 
-class ErrorLogCog(commands.Cog):
+class ErrorLogCog(commands.Cog, name="Error Logs"):
 	def __init__(self, bot):
 		self.bot = bot
 

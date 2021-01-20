@@ -39,7 +39,7 @@ reddit = praw.Reddit(
 )
 
 
-class RedditFeedCog(commands.Cog):
+class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 	"""Checks for `resend` command and starts Reddit feed loop to check submissions"""
 
 	def __init__(self, bot):

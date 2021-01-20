@@ -6,7 +6,7 @@ load_dotenv()
 MYSTERY_HUNT_ROLE_ID = int(os.getenv("MYSTERY_HUNT_ROLE_ID"))
 
 
-class CreateChannelCog(commands.Cog):
+class CreateChannelCog(commands.Cog, name="Create Channel"):
 	"""Checks for `createchannel` command
 	Creates channel in same category with given name"""
 

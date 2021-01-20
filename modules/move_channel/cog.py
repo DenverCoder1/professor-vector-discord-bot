@@ -7,7 +7,7 @@ load_dotenv()
 MYSTERY_HUNT_ROLE_ID = int(os.getenv("MYSTERY_HUNT_ROLE_ID"))
 
 
-class MoveChannelCog(commands.Cog):
+class MoveChannelCog(commands.Cog, name="Move Channel"):
 	"""Checks for `movechannel` command
 	Moves current channel to given category"""
 
