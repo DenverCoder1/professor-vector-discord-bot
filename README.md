@@ -19,3 +19,5 @@ When a new submission is posted in r/Arithmancy, it will be shared in #announcem
 ## Commands (Admin only)
 
 `!resend` - resend the last announcement (in case changes have been made)
+
+`!lockcategory <category-name>` - Lock `@everyone` from writing in a given category
