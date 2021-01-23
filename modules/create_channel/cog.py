@@ -24,10 +24,10 @@ class CreateChannelCog(commands.Cog, name="Create Channel"):
 			# get guild and category
 			guild = ctx.message.guild
 			category = ctx.channel.category
-			# reply to user
-			await ctx.send(f"Creating channel {name} in {category}!")
 			# create channel
-			await guild.create_text_channel(name, category=category)
+			channel = await guild.create_text_channel(name, category=category)
+			# reply to user
+			await ctx.send(f"Created channel {channel.mention} in {category}!")
 		# no argument passed
 		else:
 			# reply to user

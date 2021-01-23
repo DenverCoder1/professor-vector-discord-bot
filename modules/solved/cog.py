@@ -29,7 +29,7 @@ class SolvedCog(commands.Cog):
 		if not p.has_prefix():
 			new_channel_name = p.add_prefix()
 			# reply to user
-			await ctx.send(f"Marking {channel} as solved!")
+			await ctx.send(f"Marking {channel.mention} as solved!")
 			# rename channel to append prefix
 			await channel.edit(name=new_channel_name)
 		# already solved
@@ -52,7 +52,7 @@ class SolvedCog(commands.Cog):
 			# edit channel name to remove prefix
 			new_channel_name = p.remove_prefix()
 			# reply to user
-			await ctx.send(f"Marking {new_channel_name} as unsolved!")
+			await ctx.send(f"Marking {channel.mention} as unsolved!")
 			# rename channel to remove prefix
 			await channel.edit(name=new_channel_name)
 		# already solved

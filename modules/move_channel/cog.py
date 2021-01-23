@@ -30,7 +30,7 @@ class MoveChannelCog(commands.Cog, name="Move Channel"):
 			new_category = discord.utils.get(ctx.guild.channels, name=category_name)
 			if new_category is not None:
 				# reply to user
-				await ctx.send(f"Moving {channel} to {new_category}!")
+				await ctx.send(f"Moving {channel.mention} to {new_category}!")
 				# move channel
 				await ctx.channel.edit(category=new_category)
 			else:
