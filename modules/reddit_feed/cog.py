@@ -7,9 +7,9 @@ from dotenv.main import load_dotenv
 from discord.ext.tasks import loop
 from discord.ext import commands
 
-import praw
-from prawcore.exceptions import PrawcoreException
-import praw.exceptions
+import asyncpraw
+from asyncprawcore.exceptions import AsyncPrawcoreException
+import asyncpraw.exceptions
 
 from modules.reddit_feed.reddit_post import RedditPost
 
@@ -29,8 +29,8 @@ CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 CHECK_INTERVAL = 5  # seconds to wait before checking again
 SUBMISSION_LIMIT = 5  # number of submissions to check
 
-# initialize praw reddit api
-reddit = praw.Reddit(
+# initialize AsyncPraw reddit api
+reddit = asyncpraw.Reddit(
 	client_id=CLIENT_ID,
 	client_secret=CLIENT_SECRET,
 	password=PASSWORD,
@@ -70,7 +70,8 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 		# respond to command
 		await ctx.send("Resending last announcement!")
 		# check for last submission in subreddit
-		for submission in reddit.subreddit(SUB).new(limit=1):
+		subreddit = await reddit.subreddit(SUB)
+		async for submission in subreddit.new(limit=1):
 			# process submission
 			await RedditPost(self.bot, submission).process_post()
 
@@ -79,15 +80,16 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 		"""loop every few seconds to check for new submissions"""
 		try:
 			# check for new submission in subreddit
-			for submission in reddit.subreddit(SUB).new(limit=SUBMISSION_LIMIT):
+			subreddit = await reddit.subreddit(SUB)
+			async for submission in subreddit.new(limit=SUBMISSION_LIMIT):
 				# check if the post has been seen before
 				if not submission.saved:
 					# save post to mark as seen
 					submission.save()
 					# process submission
 					await RedditPost(self.bot, submission).process_post()
-		except PrawcoreException as err:
-			print(f"EXCEPTION: PrawcoreException. {err}")
+		except AsyncPrawcoreException as err:
+			print(f"EXCEPTION: AsyncPrawcoreException. {err}")
 			time.sleep(10)
 		except Exception as err:
 			print(f"EXCEPTION: An error occured. {err}")
