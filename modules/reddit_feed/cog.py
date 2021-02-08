@@ -85,7 +85,7 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 				# check if the post has been seen before
 				if not submission.saved:
 					# save post to mark as seen
-					submission.save()
+					await submission.save()
 					# process submission
 					await RedditPost(self.bot, submission).process_post()
 		except AsyncPrawcoreException as err:
