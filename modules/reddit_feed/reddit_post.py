@@ -2,6 +2,7 @@ import os
 import re
 import datetime
 import discord
+from utils.text_to_table import TextToTable
 
 ANNOUNCEMENTS_CHANNEL = int(os.getenv("DISCORD_ANNOUNCEMENTS"))
 
@@ -90,32 +91,16 @@ class RedditPost:
 				r" (\d+)|.*?Points)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
 				post.selftext,
 			)
-			# create table header
-			table = [
-				"+-----+-----+-----+-----+-----+",
-				"|  #  |  G  |  H  |  R  |  S  |",
-				"+=====+=====+=====+=====+=====+",
-			]
-			# add table body
-			for p in pointsMatch:
-				# number for puzzles, "+" for total row
-				num = f" {p[0]} " if len(p[0]) > 0 else "SUM"
-				# double row for row before totals
-				divider = (
-					"+-----+-----+-----+-----+-----+"
-					if p != pointsMatch[-2]
-					else "+=====+=====+=====+=====+=====+"
-				)
-				# add table row
-				table += [
-					f"| {num} |{p[1].rjust(4)} |{p[2].rjust(4)} |{p[3].rjust(4)}"
-					f" |{p[4].rjust(4)} |",
-					divider,
-				]
+			# create unicode table
+			table = TextToTable(
+				["#", "G", "H", "R", "S"],
+				pointsMatch[0:-1],
+				["SUM"] + list(pointsMatch[-1][1:]),
+			).tableize()
 			# replace markdown table
 			selftext = re.sub(
 				r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
-				"```\n" + "\n".join(table) + "\n```",
+				"```\n" + table + "\n```",
 				selftext,
 			)
 			selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
