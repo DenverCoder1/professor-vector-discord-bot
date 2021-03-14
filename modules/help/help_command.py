@@ -35,7 +35,7 @@ class NewHelpCommand(commands.MinimalHelpCommand):
 				# \u2002 = en space
 				value = "\u2002".join(f"{prefix}{c.name}" for c in filtered)
 				if cog and cog.description:
-					description = f"{cog.description}\n{value}"
+					value = f"{cog.description}\n{value}"
 				embed.add_field(name=name, value=value)
 
 		embed.set_footer(text=self.get_ending_note())

@@ -1,11 +1,8 @@
-import os
+import config
 import re
 import datetime
 import discord
 from utils.text_to_table import TextToTable
-
-ANNOUNCEMENTS_CHANNEL = int(os.getenv("DISCORD_ANNOUNCEMENTS"))
-
 
 class RedditPost:
 	def __init__(self, bot, post):
@@ -25,7 +22,7 @@ class RedditPost:
 
 	async def __announce(self, title, message):
 		"""send message in announcements channel"""
-		channel = self.bot.get_channel(ANNOUNCEMENTS_CHANNEL)
+		channel = self.bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
 		embed = discord.Embed(title=title, description=message)
 		await channel.send(embed=embed)
 
