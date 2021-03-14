@@ -1,6 +1,6 @@
 import traceback
 from discord import logging
-from discord.ext.commands.errors import *
+from discord.ext.commands import errors
 from datetime import datetime
 
 
@@ -29,26 +29,26 @@ class ErrorHandler:
 			await self.message.channel.send(user_error)
 
 	def __user_error_message(self):
-		if isinstance(self.error, CommandNotFound):
+		if isinstance(self.error, errors.CommandNotFound):
 			pass  # ignore command not found
-		elif isinstance(self.error, MissingRequiredArgument):
+		elif isinstance(self.error, errors.MissingRequiredArgument):
 			return f"Argument {self.error.param} required."
-		elif isinstance(self.error, TooManyArguments):
+		elif isinstance(self.error, errors.TooManyArguments):
 			return f"Too many arguments given."
-		elif isinstance(self.error, BadArgument):
+		elif isinstance(self.error, errors.BadArgument):
 			return f"Bad argument: {self.error}"
-		elif isinstance(self.error, NoPrivateMessage):
+		elif isinstance(self.error, errors.NoPrivateMessage):
 			return f"That command cannot be used in DMs."
-		elif isinstance(self.error, MissingPermissions):
+		elif isinstance(self.error, errors.MissingPermissions):
 			return (
 				"You are missing the following permissions required to run the"
 				f' command: {", ".join(self.error.missing_perms)}.'
 			)
-		elif isinstance(self.error, DisabledCommand):
+		elif isinstance(self.error, errors.DisabledCommand):
 			return f"That command is disabled or under maintenance."
-		elif isinstance(self.error, CommandInvokeError):
+		elif isinstance(self.error, errors.CommandInvokeError):
 			return f"Error while executing the command."
-		elif isinstance(self.error, MissingRole):
+		elif isinstance(self.error, errors.MissingRole):
 			role_id = int("".join(filter(lambda x: x.isdigit(), str(self.error))))
 			if role_id and self.message and self.message.guild:
 				role_name = self.message.guild.get_role(role_id)

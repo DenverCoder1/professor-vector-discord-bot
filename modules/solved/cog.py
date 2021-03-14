@@ -1,11 +1,6 @@
-import os
-from dotenv.main import load_dotenv
+import config
 from discord.ext import commands
 from modules.solved.prefix import Prefix
-
-load_dotenv()
-MYSTERY_HUNT_ROLE_ID = int(os.getenv("MYSTERY_HUNT_ROLE_ID"))
-
 
 class SolvedCog(commands.Cog):
 	"""Checks for `solved` and `unsolved` command
@@ -16,7 +11,11 @@ class SolvedCog(commands.Cog):
 		self.prefix = "solved"
 
 	@commands.command(name="solved")
-	@commands.has_role(MYSTERY_HUNT_ROLE_ID)
+	@commands.has_any_role(
+		config.MYSTERY_HUNT_ROLE_ID,
+		config.VERIFIED_PUZZLER_ROLE_ID,
+		config.TEST_HUNTER_ROLE_ID,
+	)
 	async def solved(self, ctx):
 		"""Changes channel name to solved-<channel-name>"""
 		# log command in console
@@ -38,7 +37,11 @@ class SolvedCog(commands.Cog):
 			await ctx.send(f"Channel already marked as solved!")
 
 	@commands.command(name="unsolved")
-	@commands.has_role(MYSTERY_HUNT_ROLE_ID)
+	@commands.has_any_role(
+		config.MYSTERY_HUNT_ROLE_ID,
+		config.VERIFIED_PUZZLER_ROLE_ID,
+		config.TEST_HUNTER_ROLE_ID,
+	)
 	async def unsolved(self, ctx):
 		"""removed solved prefix from channel name"""
 		# log command in console

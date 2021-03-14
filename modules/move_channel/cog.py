@@ -1,11 +1,6 @@
-import os
-from dotenv.main import load_dotenv
+import config
 import discord
 from discord.ext import commands
-
-load_dotenv()
-MYSTERY_HUNT_ROLE_ID = int(os.getenv("MYSTERY_HUNT_ROLE_ID"))
-
 
 class MoveChannelCog(commands.Cog, name="Move Channel"):
 	"""Checks for `movechannel` command
@@ -15,7 +10,11 @@ class MoveChannelCog(commands.Cog, name="Move Channel"):
 		self.bot = bot
 
 	@commands.command(name="movechannel")
-	@commands.has_role(MYSTERY_HUNT_ROLE_ID)
+	@commands.has_any_role(
+		config.MYSTERY_HUNT_ROLE_ID,
+		config.VERIFIED_PUZZLER_ROLE_ID,
+		config.TEST_HUNTER_ROLE_ID,
+	)
 	async def movechannel(self, ctx, *args):
 		"""Command to move channel to category with given name"""
 		# log command in console

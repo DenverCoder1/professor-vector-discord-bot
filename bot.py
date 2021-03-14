@@ -1,21 +1,16 @@
-import os
-from dotenv.main import load_dotenv
 import discord
+import os
 from discord.ext import commands
-
-load_dotenv()
-
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-BOT_PREFIX = "!"
+import config
 
 def main():
 	# allows privledged intents for monitoring members joining, roles editing, and role assignments
-    # these need to be enabled in the developer portal as well
+	# these need to be enabled in the developer portal as well
 	intents = discord.Intents.default()
 	intents.guilds = True
 	intents.members = True
 
-	client = commands.Bot(BOT_PREFIX, intents=intents)  # bot command prefix
+	client = commands.Bot(config.BOT_PREFIX, intents=intents)  # bot command prefix
 
 	# Get the modules of all cogs whose directory structure is modules/<module_name>/cog.py
 	for folder in os.listdir("modules"):
@@ -28,7 +23,7 @@ def main():
 		print(f"{client.user.name} has connected to Discord!")
 
 	# Run Discord bot
-	client.run(DISCORD_TOKEN)
+	client.run(config.DISCORD_TOKEN)
 
 
 if __name__ == "__main__":
