@@ -72,13 +72,13 @@ class RedditPost:
 			"""display only theme and schedule in announcements"""
 			selftext = ""
 			# extract theme from post text
-			themeMatch = re.findall(r"(The theme .*?: .*?)\n", post.selftext)
-			if len(themeMatch) > 0:
-				selftext += themeMatch[0]
-			puzzlesMatch = re.findall(
+			theme_match = re.findall(r"(The theme .*?: .*?)\n", post.selftext)
+			if len(theme_match) > 0:
+				selftext += theme_match[0]
+			puzzles_match = re.findall(
 				r"(Puzzle \d)\|(\[.*?\]\(.*?\))\|(\[.*?\]\(.*?\))\|", post.selftext
 			)
-			for puzzle in puzzlesMatch:
+			for puzzle in puzzles_match:
 				selftext += f"\n\n**{puzzle[0]}**\n{puzzle[1]} until {puzzle[2]}"
 			return selftext
 
@@ -86,27 +86,28 @@ class RedditPost:
 			"""tabulate points in results post and trim"""
 			selftext = post.selftext
 			# find points in post text
-			pointsMatch = re.findall(
+			points_match = re.findall(
 				r"(?:Puzzle"
 				r" (\d+)|.*?Points)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
 				post.selftext,
 			)
-			# create unicode table
-			table = TextToTable(
-				["#", "G", "H", "R", "S"],
-				pointsMatch[0:-1],
-				["SUM"] + list(pointsMatch[-1][1:]),
-			).tableize()
-			# replace markdown table
-			selftext = re.sub(
-				r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
-				"```\n" + table + "\n```",
-				selftext,
-			)
-			selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
+			if points_match:
+				# create unicode table
+				table = TextToTable(
+					["#", "G", "H", "R", "S"],
+					points_match[0:-1],
+					["SUM"] + list(points_match[-1][1:]),
+				).tableize()
+				# replace markdown table
+				selftext = re.sub(
+					r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
+					"```\n" + table + "\n```",
+					selftext,
+				)
+				selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
 			# trim text if over limit of characters
-			trimLength = max(600, selftext.find("Level Results"))
-			selftext = trim_text(selftext, trimLength)
+			trim_length = max(600, selftext.find("Level Results"))
+			selftext = trim_text(selftext, trim_length)
 			return format_markdown(selftext)
 
 		def format_puzzle_post(post):

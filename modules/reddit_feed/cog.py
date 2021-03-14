@@ -91,9 +91,6 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 		except AsyncPrawcoreException as err:
 			print(f"EXCEPTION: AsyncPrawcoreException. {err}")
 			time.sleep(10)
-		except Exception as err:
-			print(f"EXCEPTION: An error occured. {err}")
-			time.sleep(10)
 
 	@reddit_feed.before_loop
 	async def reddit_feed_init(self):
