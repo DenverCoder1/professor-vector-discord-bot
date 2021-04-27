@@ -2,7 +2,7 @@ import config
 import re
 import datetime
 import discord
-from utils.text_to_table import TextToTable
+from table2ascii import table2ascii, Alignment
 
 class RedditPost:
 	def __init__(self, bot, post):
@@ -90,11 +90,13 @@ class RedditPost:
 			)
 			if points_match:
 				# create unicode table
-				table = TextToTable(
-					["#", "G", "H", "R", "S"],
-					points_match[0:-1],
-					["SUM"] + list(points_match[-1][1:]),
-				).tableize()
+				table = table2ascii(
+					header=["#", "G", "H", "R", "S"],
+					body=points_match[0:-1],
+					footer=["SUM"] + list(points_match[-1][1:]),
+					first_col_heading=True,
+					alignments=[Alignment.CENTER] + [Alignment.RIGHT] * 4,
+				)
 				# replace markdown table
 				selftext = re.sub(
 					r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
