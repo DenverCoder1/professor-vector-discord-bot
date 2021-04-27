@@ -2,3 +2,4 @@ discord.py==1.6.0
 asyncpraw==7.1.0
 asyncprawcore==1.5.1
 python-dotenv==0.15.0
+table2ascii==0.0.3
