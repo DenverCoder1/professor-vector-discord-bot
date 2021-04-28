@@ -47,7 +47,7 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 
 	@commands.command(name="resend")
 	@commands.has_permissions(administrator=True)
-	@is_in_guild(config.ARITHMANCY_GUILD_ID)
+	@is_in_guild(config.GUILD_ID)
 	async def resend(self, ctx):
 		"""Command to resend the last post again.
 		Invoked with !resend"""
