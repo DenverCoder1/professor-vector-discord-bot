@@ -100,7 +100,7 @@ class RedditPost:
 				# replace markdown table
 				selftext = re.sub(
 					r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
-					"```\n" + table + "\n```",
+					"```ml\n" + table + "\n```",
 					selftext,
 				)
 				selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
