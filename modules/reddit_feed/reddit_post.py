@@ -20,11 +20,15 @@ class RedditPost:
 		# log announcement status in console
 		print(f"Sent announcement.")
 
-	async def __announce(self, title, message):
+	async def __announce(self, title: str, description: str):
 		"""send message in announcements channel"""
-		channel = self.bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
-		embed = discord.Embed(title=title, description=message)
-		await channel.send(embed=embed)
+		channel: discord.TextChannel = self.bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
+		embed = discord.Embed(title=title, description=description)
+		message: discord.Message = await channel.send(embed=embed)
+		try:
+			await message.publish()
+		except Exception:
+			pass
 
 	def __get_date(self):
 		"""convert post date to readable timestamp"""
