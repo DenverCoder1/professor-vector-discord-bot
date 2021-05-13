@@ -24,8 +24,8 @@ def format_date(
         date_format += " %Y"
     # include the time if it is not an all day event and not the same as the base
     if not all_day and date != base:
-        # %H = Hours (24-hour clock), %M = Minutes
-        date_format += " %H:%M"
+        # %I = Hours (12-hour clock), %M = Minutes
+        date_format += " %I:%M %p"
     if include_timezone:
         date_format += " %Z"
     # format the date and remove leading zeros and trailing spaces

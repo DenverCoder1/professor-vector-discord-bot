@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
+import pytz
 import re
 from typing import Optional
-from utils.dates import parse_date
+from utils.dates import format_date, parse_date
 
 import discord
 
@@ -9,8 +10,10 @@ command_regex = re.compile(r"!!([\w :,\.\-\/]+)!!")
 
 
 countdown_regex = re.compile(
-    r"\b(?P<hours>\d+?) hours? and (?P<minutes>\d+?) minutes?\b"
+    r"\*\*(?P<hours>\d+?) hours? and (?P<minutes>\d+?) minutes?\*\*"
 )
+
+date_in_countdown_regex = re.compile(r"\(Countdown to ([\w :,\.\-\/]+)\)")
 
 
 def message_has_command(message: discord.Message) -> bool:
@@ -46,23 +49,42 @@ def parse_timedelta(time_str):
 
 
 def format_timedelta(td: timedelta) -> str:
-    hrs, mins = td.seconds // 3600, (td.seconds // 60) % 60
-    return f"{hrs} {'hours' if hrs != 1 else 'hour'} and {mins} {'minutes' if mins != 1 else 'minute'}"
+    seconds = int(td.total_seconds())
+    hrs, mins = 0, 0
+    if seconds > 0:
+        hrs, mins = seconds // 3600, (seconds // 60) % 60
+    return f"**{hrs} {'hours' if hrs != 1 else 'hour'} and {mins} {'minutes' if mins != 1 else 'minute'}**"
+
+
+def get_timedelta(date: datetime) -> timedelta:
+    tz = date.tzinfo if date.tzinfo else pytz.timezone("US/Eastern")
+    now = datetime.now().astimezone(tz)
+    date = date.astimezone(tz)
+    return date - now
 
 
 def get_updated_content(message: discord.Message) -> str:
-    last_timedelta = parse_timedelta(message.content)
-    last_edited = datetime.utcnow() - (message.edited_at or message.created_at)
-    new_timedelta = last_timedelta - last_edited
-    countdown = format_timedelta(new_timedelta)
+    match = date_in_countdown_regex.search(message.content)
+    if not match:
+        print("Date match not found")
+        return message.content
+    date = parse_date(date_str=match.group(1))
+    if not isinstance(date, datetime):
+        raise ValueError("An error occurred while updating countdown.")
+    td = get_timedelta(date)
+    countdown = format_timedelta(td)
     return countdown_regex.sub(countdown, message.content)
 
 
 async def create_countdown(message: discord.Message) -> discord.Message:
-    date_str = command_regex.search(message.content).group(1)
-    now = datetime.utcnow().replace(tzinfo=None)
-    date = parse_date(date_str=date_str, to_tz="UTC", future=True).replace(tzinfo=None)
-    td = date - now
+    match = command_regex.search(message.content)
+    date = parse_date(date_str=match.group(1), future=True)
+    if not isinstance(date, datetime):
+        return await message.channel.send("An error occurred while creating countdown.")
+    td = get_timedelta(date)
     countdown = format_timedelta(td)
-    content = command_regex.sub(countdown, message.content)
+    content = (
+        command_regex.sub(countdown, message.content)
+        + f"\n\n(Countdown to {format_date(date)})"
+    )
     return await message.channel.send(content=content)
