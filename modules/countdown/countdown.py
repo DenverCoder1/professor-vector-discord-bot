@@ -10,7 +10,7 @@ command_regex = re.compile(r"!!([\w :,\.\-\/]+)!!")
 
 
 countdown_regex = re.compile(
-    r"\*\*(?P<hours>\d+?) hours? and (?P<minutes>\d+?) minutes?\*\*"
+    r"\*\*(?:(?P<hours>\d+?) hours? and )?(?P<minutes>\d+?) minutes?\*\*"
 )
 
 date_in_countdown_regex = re.compile(r"\(Countdown to ([\w :,\.\-\/]+)\)")
@@ -53,7 +53,11 @@ def format_timedelta(td: timedelta) -> str:
     hrs, mins = 0, 0
     if seconds > 0:
         hrs, mins = seconds // 3600, (seconds // 60) % 60
-    return f"**{hrs} {'hours' if hrs != 1 else 'hour'} and {mins} {'minutes' if mins != 1 else 'minute'}**"
+    output = "**"
+    if hrs > 0:
+        output += f"{hrs} {'hours' if hrs != 1 else 'hour'} and "
+    output += f"{mins} {'minutes' if mins != 1 else 'minute'}**"
+    return output
 
 
 def get_timedelta(date: datetime) -> timedelta:
@@ -78,7 +82,10 @@ def get_updated_content(message: discord.Message) -> str:
 
 async def create_countdown(message: discord.Message) -> discord.Message:
     match = command_regex.search(message.content)
-    date = parse_date(date_str=match.group(1), future=True)
+    date = parse_date(
+        date_str=match.group(1),
+        base=datetime.combine(datetime.today(), datetime.min.time()),
+    )
     if not isinstance(date, datetime):
         return await message.channel.send("An error occurred while creating countdown.")
     td = get_timedelta(date)
