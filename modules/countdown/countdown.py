@@ -85,6 +85,7 @@ async def create_countdown(message: discord.Message) -> discord.Message:
     date = parse_date(
         date_str=match.group(1),
         base=datetime.combine(datetime.today(), datetime.min.time()),
+        future=True,
     )
     if not isinstance(date, datetime):
         return await message.channel.send("An error occurred while creating countdown.")
