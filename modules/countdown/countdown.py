@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
-import pytz
 import re
+from datetime import datetime, timedelta
 from typing import Optional
-from utils.dates import format_date, parse_date
 
 import discord
+import pytz
+from utils.dates import format_date, parse_date
 
 command_regex = re.compile(r"!!([\w :,\.\-\/]+)!!")
 
@@ -49,13 +49,17 @@ def parse_timedelta(time_str):
 
 
 def format_timedelta(td: timedelta) -> str:
-    seconds = int(td.total_seconds())
+    # round up to the next minute
+    seconds = int(td.total_seconds() + 59)
+    # only display difference if it's positive
     hrs, mins = 0, 0
     if seconds > 0:
         hrs, mins = seconds // 3600, (seconds // 60) % 60
     output = "**"
     if hrs > 0:
+        # display hours if it's greater than 0
         output += f"{hrs} {'hours' if hrs != 1 else 'hour'} and "
+    # display minutes
     output += f"{mins} {'minutes' if mins != 1 else 'minute'}**"
     return output
 
