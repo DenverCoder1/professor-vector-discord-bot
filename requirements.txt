@@ -4,3 +4,4 @@ asyncprawcore==1.5.1
 python-dotenv==0.15.0
 table2ascii==0.0.3
 pytz==2021.1
+dateparser==1.0.0
