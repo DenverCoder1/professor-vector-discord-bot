@@ -99,4 +99,6 @@ async def create_countdown(message: discord.Message) -> discord.Message:
         command_regex.sub(countdown, message.content)
         + f"\n\n(Countdown to {format_date(date)})"
     )
-    return await message.channel.send(content=content)
+    countdown_message = await message.channel.send(content=content)
+    await message.delete()
+    return countdown_message
