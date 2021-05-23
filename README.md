@@ -2,11 +2,15 @@
 
 Discord bot for r/Arithmancy - A reddit feed bot and more!
 
-## Triggers
+## ⏰ Triggers and Tasks
 
 When a new submission is posted in r/Arithmancy, it will be shared in #announcements
 
-## Commands (Archivist Role Only)
+If there is an active countdown in #announcements, it will be updated every minute.
+
+The countdown is activated by including a date enclosed in `!!` within a message (ex. `!!23 May 2pm EDT!! until the puzzle ends!`)
+
+## 🗄️ Commands (Archivist Role Only)
 
 `!createchannel <channel-name>` - create a channel with the given name in the same category
 
@@ -16,7 +20,7 @@ When a new submission is posted in r/Arithmancy, it will be shared in #announcem
 
 `!unsolved` - remove the solved prefix from a channel name (ex. "solved-channel" becomes "channel")
 
-## Commands (Admin only)
+## 🧑‍💼 Commands (Admin only)
 
 `!resend` - resend the last announcement (in case changes have been made)
 
