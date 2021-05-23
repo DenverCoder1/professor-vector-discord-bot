@@ -57,7 +57,7 @@ class Countdown(commands.Cog, name="Countdown"):
 
     @countdown.before_loop
     async def clock_init(self) -> None:
-        """print startup info before reddit feed loop begins"""
+        """print startup info"""
         print("Starting countdown...")
 
 
