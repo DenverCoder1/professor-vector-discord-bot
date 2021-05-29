@@ -6,14 +6,14 @@ import discord
 import pytz
 from utils.dates import format_date, parse_date
 
-command_regex = re.compile(r"!!([\w :,\.\-\/]+)!!")
+command_regex = re.compile(r"!!([\w :,\.\-\/\+]+)!!")
 
 
 countdown_regex = re.compile(
     r"\*\*(?:(?P<hours>\d+?) hours? and )?(?P<minutes>\d+?) minutes?\*\*"
 )
 
-date_in_countdown_regex = re.compile(r"\(Countdown to ([\w :,\.\-\/]+)\)")
+date_in_countdown_regex = re.compile(r"\(Countdown to ([\w :,\.\-\/\+]+)\)$")
 
 
 def message_has_command(message: discord.Message) -> bool:
