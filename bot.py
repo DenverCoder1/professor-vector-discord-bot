@@ -3,6 +3,7 @@ import os
 from discord.ext import commands
 import config
 
+
 def main():
 	# allows privledged intents for monitoring members joining, roles editing, and role assignments
 	# these need to be enabled in the developer portal as well
@@ -10,7 +11,9 @@ def main():
 	intents.guilds = True
 	intents.members = True
 
-	client = commands.Bot(config.BOT_PREFIX, intents=intents)  # bot command prefix
+	activity = discord.Game(name="around with numbers")
+
+	client = commands.Bot(config.BOT_PREFIX, intents=intents, activity=activity)
 
 	# Get the modules of all cogs whose directory structure is modules/<module_name>/cog.py
 	for folder in os.listdir("modules"):
