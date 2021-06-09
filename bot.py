@@ -11,9 +11,7 @@ def main():
 	intents.guilds = True
 	intents.members = True
 
-	activity = discord.Game(name="around with numbers")
-
-	client = commands.Bot(config.BOT_PREFIX, intents=intents, activity=activity)
+	client = commands.Bot(config.BOT_PREFIX, intents=intents)
 
 	# Get the modules of all cogs whose directory structure is modules/<module_name>/cog.py
 	for folder in os.listdir("modules"):
