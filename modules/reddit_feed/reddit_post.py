@@ -135,7 +135,7 @@ class RedditPost:
 		# get url and selftext
 		emoji = self.__get_emoji()
 		title = self.post.title
-		url = f"https://www.reddit.com/r/{self.post.subreddit}/comments/{self.post.id}"
+		url = f"https://redd.it/{self.post.id}"
 		selftext = self.__format_selftext()
 		# create the message
 		title = f"{emoji}  |  **{title}**"
