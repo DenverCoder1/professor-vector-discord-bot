@@ -59,7 +59,11 @@ class RedditPost:
 
 				return re.sub(r"(?:^|(?<=\n))#+[ \t]*(.*?\n)", transform_title, text)
 
-			return format_headings(text)
+			def format_spoilers(text):
+				"""substitute spoilers like `>!spoiler!<` with `||spoiler||`"""
+				return re.sub(r">!((?:.|\s)*?)(?:!<|$)", r"||\1||", text)
+
+			return format_spoilers(format_headings(text))
 
 		def trim_text(text, limit=600):
 			"""trim text if over limit of characters"""
