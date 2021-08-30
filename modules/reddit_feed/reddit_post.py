@@ -57,7 +57,7 @@ class RedditPost:
 					"""transform matched group to uppercase"""
 					return match.group(1).upper()
 
-				return re.sub(r"(?:^|(?<=\n))#+[ \t]*(.*?\n)", transform_title, text)
+				return re.sub(r"(?:^|(?<=[\n\r]))#+[ \t]*(.*?[\n\r])", transform_title, text)
 
 			def format_spoilers(text):
 				"""substitute spoilers like `>!spoiler!<` with `||spoiler||`"""
