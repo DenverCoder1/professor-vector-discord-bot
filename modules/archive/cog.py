@@ -1,17 +1,22 @@
+import asyncio
+import os
+import zipfile
+
 import discord
 from discord.ext import commands
-import constants
-import os
-import shutil
-import zipfile
-from utils import discord_utils, logging_utils, admin_utils
-from modules.archive import archive_constants, archive_utils
-import asyncio
+from discord.ext.commands.core import has_permissions
+from utils import discord_utils, logging_utils
+
+from . import archive_constants, archive_utils
 
 
 # TODO: This cipher_race's gonna need some refactoring. We should be able to save a lot of space, since most of the commands
 # Use a lot of the same cipher_race. Also, archiving is super slow.
 class ArchiveCog(commands.Cog, name="Archive"):
+
+    # File size restriction
+    BYTES_TO_MEGABYTES = 1_048_576 # 1024 squared
+
     """Downloads a channel's history and sends it as a file to the user"""
     def __init__(self, bot):
         self.bot = bot
@@ -71,16 +76,16 @@ class ArchiveCog(commands.Cog, name="Archive"):
                 embed.add_field(name="ERROR: History Too Big",
                                 value=f"Sorry about that! The chat log in {channel.mention} is too big for me to send.\n"
                                       f"The max file size I can send in this server is "
-                                      f"`{(filesize_limit/constants.BYTES_TO_MEGABYTES):.2f}MB`, but the chat log is "
-                                      f"`{(textfile_size/constants.BYTES_TO_MEGABYTES):.2f}MB`",
+                                      f"`{(filesize_limit/self.BYTES_TO_MEGABYTES):.2f}MB`, but the chat log is "
+                                      f"`{(textfile_size/self.BYTES_TO_MEGABYTES):.2f}MB`",
                                 inline=False)
                 file = None
             else:
                 embed.add_field(name="WARNING: Attachments Too Big",
                                 value=f"There are too many photos in {channel.mention} for me to send. The max file size "
                                       f"I can send in this server is "
-                                      f"`{(filesize_limit/constants.BYTES_TO_MEGABYTES):.2f}MB` but the zip is "
-                                      f"`{(zip_file_size/constants.BYTES_TO_MEGABYTES):.2f}MB`. I'll only be able to send you the chat log.",
+                                      f"`{(filesize_limit/self.BYTES_TO_MEGABYTES):.2f}MB` but the zip is "
+                                      f"`{(zip_file_size/self.BYTES_TO_MEGABYTES):.2f}MB`. I'll only be able to send you the chat log.",
                                 inline=False)
                 ZIP_FILENAME = os.path.join(archive_constants.ARCHIVE, channel.name + '_archive.zip')
                 with zipfile.ZipFile(ZIP_FILENAME, mode='w') as zf:
@@ -91,20 +96,20 @@ class ArchiveCog(commands.Cog, name="Archive"):
             embed = None
         return file, embed
 
-    @admin_utils.is_verified()
     @commands.command(name="archive")
+    @has_permissions(manage_messages=True)
     async def archive(self, ctx, *args):
         logging_utils.log_command("archive", ctx.channel, ctx.author)
         embed = discord.Embed(title="Error!",
                               description=f"The command `{ctx.prefix}archive` does not exist! Did you mean `{ctx.prefix}archivechannel` instead?")
         await ctx.send(embed=embed)    
 
-    @admin_utils.is_verified()
     @commands.command(name="archivechannel")
+    @has_permissions(manage_messages=True)
     async def archivechannel(self, ctx, *args):
         """Command to download channel's history
 
-        Usage: `~archivechannel #channel`"""
+        Usage: `!archivechannel #channel`"""
         # TODO: Need error handling for asking a channel we don't have access to or invalid channel name
         logging_utils.log_command("archivechannel", ctx.channel, ctx.author)
         # Check if the user supplied a channel
@@ -182,12 +187,12 @@ class ArchiveCog(commands.Cog, name="Archive"):
             # Clean up the archive dir
             archive_utils.reset_archive_dir()
 
-    @admin_utils.is_owner_or_admin()
     @commands.command(name="archivecategory")
+    @has_permissions(manage_messages=True)
     async def archivecategory(self, ctx, *args):
         """Command to download the history of every text channel in the category
 
-        Usage: `~archivecategory category name`"""
+        Usage: `!archivecategory category name`"""
         logging_utils.log_command("archivecategory", ctx.channel, ctx.author)
         # Check if the user supplied a channel
         if len(args) < 1:
@@ -263,13 +268,12 @@ class ArchiveCog(commands.Cog, name="Archive"):
         archive_utils.reset_archive_dir()
 
     # TODO: This cipher_race is mostly copy/pasted from archivecategory
-    @admin_utils.is_owner_or_admin()
     @commands.command(name="archiveserver")
+    @has_permissions(administrator=True)
     async def archiveserver(self, ctx):
-        """Command to archive every text channel in the server. WARNING: This command will take *very*
-        long on any reasonably aged server
+        """Command to archive every text channel in the server. WARNING: This command will take *very* long on any reasonably aged server
 
-        Usage: `~archiveserver`"""
+        Usage: `!archiveserver`"""
         logging_utils.log_command("archiveserver", ctx.channel, ctx.author)
         # If we don't have the lock, let the user know it may take a while.
         msg = None
@@ -320,7 +324,6 @@ class ArchiveCog(commands.Cog, name="Archive"):
         archive_utils.reset_archive_dir()
 
     async def get_start_embed(self, channel_or_guild, multiple_channels=None):
-        owner = await self.bot.fetch_user(os.getenv("BOT_OWNER_DISCORD_ID"))
         embed = discord_utils.create_embed()
         embed.add_field(name="Archive Started",
                         value=f"Your archiving of {channel_or_guild.mention if hasattr(channel_or_guild, 'mention') else channel_or_guild}"
@@ -332,7 +335,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
                             value=f"{chr(10).join([channel.name for channel in multiple_channels])}",
                             inline=False)
         embed.add_field(name="Problems?",
-                        value=f"Taking too long? Let {owner.mention} know",
+                        value=f"Taking too long? Let <@!310618854734954497> know",
                         inline=False)
         return embed
 
