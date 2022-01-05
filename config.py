@@ -12,7 +12,7 @@ ME = os.getenv("REDDIT_USERNAME")
 PASSWORD = os.getenv("REDDIT_PASSWORD")
 CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
 CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
-SUB = "Arithmancy"
+SUB = os.getenv("REDDIT_SUB", "Arithmancy")
 
 # Guild
 GUILD_ID = int(os.getenv("DISCORD_GUILD_ID"))

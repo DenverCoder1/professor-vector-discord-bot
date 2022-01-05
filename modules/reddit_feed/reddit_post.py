@@ -4,6 +4,7 @@ import datetime
 import discord
 from table2ascii import table2ascii, Alignment
 
+
 class RedditPost:
 	def __init__(self, bot, post):
 		self.bot = bot
@@ -22,7 +23,9 @@ class RedditPost:
 
 	async def __announce(self, title: str, description: str):
 		"""send message in announcements channel"""
-		channel: discord.TextChannel = self.bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
+		channel: discord.TextChannel = self.bot.get_channel(
+			config.ANNOUNCEMENTS_CHANNEL_ID
+		)
 		embed = discord.Embed(title=title, description=description)
 		message: discord.Message = await channel.send(embed=embed)
 		try:
@@ -57,7 +60,9 @@ class RedditPost:
 					"""transform matched group to uppercase"""
 					return match.group(1).upper()
 
-				return re.sub(r"(?:^|(?<=[\n\r]))#+[ \t]*(.*?[\n\r])", transform_title, text)
+				return re.sub(
+					r"(?:^|(?<=[\n\r]))#+[ \t]*(.*?[\n\r])", transform_title, text
+				)
 
 			def format_spoilers(text):
 				"""substitute spoilers like `>!spoiler!<` with `||spoiler||`"""
@@ -81,10 +86,11 @@ class RedditPost:
 			if len(theme_match) > 0:
 				selftext += theme_match[0]
 			puzzles_match = re.findall(
-				r"(Puzzle \d)\|(\[.*?\]\(.*?\))\|(\[.*?\]\(.*?\))\|", post.selftext
+				r"([^|]*?)\|([^|]*?\d, [^|]*?)\|([^|]*?\d, [^|]*?)\|",
+				post.selftext,
 			)
 			for puzzle in puzzles_match:
-				selftext += f"\n\n**{puzzle[0]}**\n{puzzle[1]} until {puzzle[2]}"
+				selftext += f"\n**{puzzle[0]}**\n{puzzle[1]} until {puzzle[2]}"
 			return selftext
 
 		def format_results_post(post):
@@ -92,8 +98,7 @@ class RedditPost:
 			selftext = post.selftext
 			# find points in post text
 			points_match = re.findall(
-				r"(?:Puzzle"
-				r" (\d+)|.*?Points)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
+				r"\w.*?(\d*)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
 				post.selftext,
 			)
 			if points_match:
@@ -107,8 +112,8 @@ class RedditPost:
 				)
 				# replace markdown table
 				selftext = re.sub(
-					r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n",
-					"```ml\n" + table + "\n```",
+					r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n+",
+					"```ml\n" + table + "\n```\n",
 					selftext,
 				)
 				selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
