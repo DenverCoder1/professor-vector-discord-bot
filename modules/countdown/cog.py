@@ -15,10 +15,13 @@ from .countdown import (
 class Countdown(commands.Cog, name="Countdown"):
     def __init__(self, bot: commands.Bot):
         self.__bot = bot
+        self.__channel = None
 
     @commands.Cog.listener()
     async def on_ready(self):
         """When discord is connected"""
+        if self.__channel:
+            return
         # get clock channel object
         self.__channel = self.__bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
         # check that channel exists

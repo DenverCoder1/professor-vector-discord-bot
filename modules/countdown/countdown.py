@@ -4,7 +4,7 @@ from typing import Optional
 
 import discord
 import pytz
-from utils.dates import format_date, parse_date
+from utils.dates import format_timestamp, parse_date
 
 command_regex = re.compile(r"!!([\w :,\.\-\/\+]+)!!")
 
@@ -13,7 +13,7 @@ countdown_regex = re.compile(
     r"\*\*(?:(?P<hours>\d+?) hours? and )?(?P<minutes>\d+?) minutes?\*\*"
 )
 
-date_in_countdown_regex = re.compile(r"\(Countdown to ([\w :,\.\-\/\+]+)\)$")
+date_in_countdown_regex = re.compile(r"\(Countdown to <t:(\d+):?\w?>\)$")
 
 
 def message_has_command(message: discord.Message) -> bool:
@@ -76,7 +76,8 @@ def get_updated_content(message: discord.Message) -> str:
     if not match:
         print("Date match not found")
         return message.content
-    date = parse_date(date_str=match.group(1))
+    # get date from unix timestamp
+    date = datetime.fromtimestamp(int(match.group(1)))
     if not isinstance(date, datetime):
         raise ValueError("An error occurred while updating countdown.")
     td = get_timedelta(date)
@@ -97,7 +98,7 @@ async def create_countdown(message: discord.Message) -> discord.Message:
     countdown = format_timedelta(td)
     content = (
         command_regex.sub(countdown, message.content)
-        + f"\n\n(Countdown to {format_date(date)})"
+        + f"\n\n(Countdown to {format_timestamp(date)})"
     )
     countdown_message = await message.channel.send(content=content)
     await message.delete()

@@ -60,3 +60,20 @@ def parse_date(
     date = dateparser.parse(date_str, settings=settings)
     # return the datetime object
     return date
+
+
+def format_timestamp(date: datetime, format: str = "F") -> str:
+    """
+    Return a formatted Discord timestamp
+
+    Arguments:
+    :param date: :class:`datetime` The date to format
+    :param format: :class:`str` The format to use
+
+    Returns:
+    :class:`str` The formatted timestamp
+    """
+    # get unix timestamp from date
+    timestamp = date.timestamp()
+    # convert to discord timestamp
+    return f"<t:{int(timestamp)}:{format}>"
