@@ -1,5 +1,5 @@
-from discord.ext import commands
-import discord
+from nextcord.ext import commands
+import nextcord
 
 
 class LockCategoryCog(commands.Cog, name="Lock Category"):
@@ -20,7 +20,7 @@ class LockCategoryCog(commands.Cog, name="Lock Category"):
 			# join arguments to form channel name
 			category_name = " ".join(args)
 			# get new category
-			category = discord.utils.get(ctx.guild.channels, name=category_name)
+			category = nextcord.utils.get(ctx.guild.channels, name=category_name)
 			if category is not None:
 				# lock category
 				await category.set_permissions(

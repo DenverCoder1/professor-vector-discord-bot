@@ -1,6 +1,6 @@
 import config
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 
 class MoveChannelCog(commands.Cog, name="Move Channel"):
 	"""Checks for `movechannel` command
@@ -26,7 +26,7 @@ class MoveChannelCog(commands.Cog, name="Move Channel"):
 			# get current channel
 			channel = ctx.channel
 			# get new category
-			new_category = discord.utils.get(ctx.guild.channels, name=category_name)
+			new_category = nextcord.utils.get(ctx.guild.channels, name=category_name)
 			if new_category is not None:
 				# reply to user
 				await ctx.send(f"Moving {channel.mention} to {new_category}!")

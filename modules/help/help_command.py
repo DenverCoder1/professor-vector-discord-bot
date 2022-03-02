@@ -1,28 +1,28 @@
-from discord.ext import commands
-import discord
+from nextcord.ext import commands
+import nextcord
 
 
 class NewHelpCommand(commands.MinimalHelpCommand):
 	"""Custom help command override using embeds"""
 
-	COLOUR = discord.Colour.blurple()
+	COLOUR = nextcord.Colour.blurple()
 
 	def get_ending_note(self):
 		"""Returns note to display at the bottom"""
-		prefix = self.clean_prefix
+		prefix = self.context.clean_prefix
 		invoked_with = self.invoked_with
 		return f"Use {prefix}{invoked_with} [command] for more info on a command."
 
-	def get_command_signature(self, command: commands.core.Command):
+	def get_command_signature(self, command: commands.Command):
 		"""Retrieves the signature portion of the help page."""
 		return f"{command.qualified_name} {command.signature}"
 
 	async def send_bot_help(self, mapping: dict):
 		"""implements bot command help page"""
-		prefix = self.clean_prefix
-		embed = discord.Embed(title="Bot Commands", colour=self.COLOUR)
+		prefix = self.context.clean_prefix
+		embed = nextcord.Embed(title="Bot Commands", colour=self.COLOUR)
 		embed.set_author(
-			name=self.context.bot.user.name, icon_url=self.context.bot.user.avatar_url
+			name=self.context.bot.user.name, icon_url=self.context.bot.user.display_avatar.url
 		)
 		description = self.context.bot.description
 		if description:
@@ -43,7 +43,7 @@ class NewHelpCommand(commands.MinimalHelpCommand):
 
 	async def send_cog_help(self, cog: commands.Cog):
 		"""implements cog help page"""
-		embed = discord.Embed(
+		embed = nextcord.Embed(
 			title=f"{cog.qualified_name} Commands", colour=self.COLOUR
 		)
 		if cog.description:
@@ -62,7 +62,7 @@ class NewHelpCommand(commands.MinimalHelpCommand):
 
 	async def send_group_help(self, group: commands.Group):
 		"""implements group help page and command help page"""
-		embed = discord.Embed(title=group.qualified_name, colour=self.COLOUR)
+		embed = nextcord.Embed(title=group.qualified_name, colour=self.COLOUR)
 		if group.help:
 			embed.description = group.help
 

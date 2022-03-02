@@ -1,15 +1,15 @@
-import discord
+import nextcord
 import random
-from discord.ext import commands
-from discord.ext.tasks import loop
+from nextcord.ext import commands
+from nextcord.ext.tasks import loop
 
 
 class Status(commands.Cog, name="Status"):
     def __init__(self, bot: commands.Bot):
         self.__bot = bot
         self.status_list = (
-            discord.Activity(type=discord.ActivityType.watching, name="you struggle 👀"),
-            discord.Game(name="around with numbers‍"),
+            nextcord.Activity(type=nextcord.ActivityType.watching, name="you struggle 👀"),
+            nextcord.Game(name="around with numbers‍"),
         )
         self.current_status = random.randint(0, len(self.status_list) - 1)
 

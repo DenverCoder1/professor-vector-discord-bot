@@ -1,8 +1,8 @@
 import datetime
 import time
 
-from discord.ext.tasks import loop
-from discord.ext import commands
+from nextcord.ext.tasks import loop
+from nextcord.ext import commands
 
 import asyncpraw
 from asyncprawcore.exceptions import AsyncPrawcoreException

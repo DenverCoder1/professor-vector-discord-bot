@@ -2,9 +2,9 @@ import asyncio
 import os
 import zipfile
 
-import discord
-from discord.ext import commands
-from discord.ext.commands.core import has_permissions
+import nextcord
+from nextcord.ext import commands
+from nextcord.ext.commands.core import has_permissions
 from utils import discord_utils, logging_utils
 
 from . import archive_constants, archive_utils
@@ -66,7 +66,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
             zf_file_size = zf.fp.tell()
         # TODO: It may often be the case that we will be above 8MB (max filesize).
         # In that case, we just need to send the textfile
-        return discord.File(ZIP_FILENAME), zf_file_size, discord.File(text_log_path), text_file_size
+        return nextcord.File(ZIP_FILENAME), zf_file_size, nextcord.File(text_log_path), text_file_size
 
     def get_file_and_embed(self, channel, filesize_limit, zip_file, zip_file_size, textfile, textfile_size):
         """Check if zipfile and textfile can be sent or not, create embed with message"""
@@ -100,7 +100,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
     @has_permissions(manage_messages=True)
     async def archive(self, ctx, *args):
         logging_utils.log_command("archive", ctx.channel, ctx.author)
-        embed = discord.Embed(title="Error!",
+        embed = nextcord.Embed(title="Error!",
                               description=f"The command `{ctx.prefix}archive` does not exist! Did you mean `{ctx.prefix}archivechannel` instead?")
         await ctx.send(embed=embed)    
 
@@ -153,7 +153,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
                 try:
                     # zipfile, textfile
                     zip_file, zip_file_size, textfile, textfile_size = await self.archive_one_channel(channel)
-                except discord.errors.Forbidden:
+                except nextcord.errors.Forbidden:
                     embed = discord_utils.create_embed()
                     embed.add_field(name="ERROR: No access",
                                     value=f"Sorry! I don't have access to {channel}. You'll need "
@@ -168,7 +168,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
                                                       zip_file_size,
                                                       textfile,
                                                       textfile_size)
-                # There has been an issue with AIO HTTP message sending fails, in which case discord.py crashes?
+                # There has been an issue with AIO HTTP message sending fails, in which case nextcord crashes?
                 # So adding this try/catch for runtime to catch this. I don't think it's a deterministic error
                 try:
                     await ctx.send(file=file, embed=embed)
@@ -236,7 +236,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
                                                           textfile,
                                                           textfile_size)
                     await ctx.send(file=file, embed=embed)
-                except discord.errors.Forbidden:
+                except nextcord.errors.Forbidden:
                     embed = discord_utils.create_embed()
                     embed.add_field(name="ERROR: No access",
                                     value=f"Sorry! I don't have access to {text_channel.mention}. You'll need "
@@ -245,7 +245,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
                                     inline=False)
                     await ctx.send(embed=embed)
                     continue
-                # There has been an issue with AIO HTTP message sending fails, in which case discord.py crashes?
+                # There has been an issue with AIO HTTP message sending fails, in which case nextcord crashes?
                 # So adding this try/catch for runtime to catch this. I don't think it's a deterministic error
                 except RuntimeError:
                     embed = discord_utils.create_embed()
@@ -303,7 +303,7 @@ class ArchiveCog(commands.Cog, name="Archive"):
                                                           textfile,
                                                           textfile_size)
                     await ctx.send(file=file, embed=embed)
-                except discord.errors.Forbidden:
+                except nextcord.errors.Forbidden:
                     embed = discord_utils.create_embed()
                     embed.add_field(name="ERROR: No access",
                                     value=f"Sorry! I don't have access to {text_channel.mention}. You'll need "

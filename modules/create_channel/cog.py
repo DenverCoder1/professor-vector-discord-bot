@@ -1,5 +1,5 @@
 import config
-from discord.ext import commands
+from nextcord.ext import commands
 
 
 class CreateChannelCog(commands.Cog, name="Create Channel"):

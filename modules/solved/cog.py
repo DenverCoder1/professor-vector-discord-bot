@@ -1,5 +1,5 @@
 import config
-from discord.ext import commands
+from nextcord.ext import commands
 from modules.solved.prefix import Prefix
 
 class SolvedCog(commands.Cog):

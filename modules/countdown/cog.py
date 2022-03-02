@@ -1,8 +1,8 @@
 import config
-import discord
-from discord.errors import HTTPException
-from discord.ext import commands
-from discord.ext.tasks import loop
+import nextcord
+from nextcord.errors import HTTPException
+from nextcord.ext import commands
+from nextcord.ext.tasks import loop
 
 from .countdown import (
     get_last_countdown,
@@ -25,7 +25,7 @@ class Countdown(commands.Cog, name="Countdown"):
         # get clock channel object
         self.__channel = self.__bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
         # check that channel exists
-        if not isinstance(self.__channel, discord.TextChannel):
+        if not isinstance(self.__channel, nextcord.TextChannel):
             raise LookupError("Couldn't find that channel.")
         # if channel exists, get the last countdown message from the bot
         self.__message = await get_last_countdown(self.__channel)
@@ -35,7 +35,7 @@ class Countdown(commands.Cog, name="Countdown"):
         self.countdown.start()
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, message: nextcord.Message):
         """When discord is connected"""
         if message.channel != self.__channel:
             return
