@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Optional
 
-import discord
+import nextcord
 import pytz
 from utils.dates import format_timestamp, parse_date
 
@@ -16,21 +16,21 @@ countdown_regex = re.compile(
 date_in_countdown_regex = re.compile(r"\(Countdown to <t:(\d+):?\w?>\)$")
 
 
-def message_has_command(message: discord.Message) -> bool:
+def message_has_command(message: nextcord.Message) -> bool:
     content: str = message.content
     return command_regex.search(content) is not None
 
 
-def message_has_countdown(message: discord.Message) -> bool:
+def message_has_countdown(message: nextcord.Message) -> bool:
     content: str = message.content
     return countdown_regex.search(content) is not None
 
 
-async def get_last_countdown(channel: discord.TextChannel) -> Optional[discord.Message]:
+async def get_last_countdown(channel: nextcord.TextChannel) -> Optional[nextcord.Message]:
     """Returns last message that matches pattern"""
     async for message in channel.history(limit=20):
-        message: discord.Message
-        author: discord.Member = message.author
+        message: nextcord.Message
+        author: nextcord.Member = message.author
         if message_has_countdown(message) and author.bot:
             return message
     return None
@@ -71,7 +71,7 @@ def get_timedelta(date: datetime) -> timedelta:
     return date - now
 
 
-def get_updated_content(message: discord.Message) -> str:
+def get_updated_content(message: nextcord.Message) -> str:
     match = date_in_countdown_regex.search(message.content)
     if not match:
         print("Date match not found")
@@ -85,7 +85,7 @@ def get_updated_content(message: discord.Message) -> str:
     return countdown_regex.sub(countdown, message.content)
 
 
-async def create_countdown(message: discord.Message) -> discord.Message:
+async def create_countdown(message: nextcord.Message) -> nextcord.Message:
     match = command_regex.search(message.content)
     date = parse_date(
         date_str=match.group(1),

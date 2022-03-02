@@ -1,7 +1,7 @@
 import config
 import re
 import datetime
-import discord
+import nextcord
 from table2ascii import table2ascii, Alignment
 
 
@@ -23,11 +23,11 @@ class RedditPost:
 
 	async def __announce(self, title: str, description: str):
 		"""send message in announcements channel"""
-		channel: discord.TextChannel = self.bot.get_channel(
+		channel: nextcord.TextChannel = self.bot.get_channel(
 			config.ANNOUNCEMENTS_CHANNEL_ID
 		)
-		embed = discord.Embed(title=title, description=description)
-		message: discord.Message = await channel.send(embed=embed)
+		embed = nextcord.Embed(title=title, description=description)
+		message: nextcord.Message = await channel.send(embed=embed)
 		try:
 			await message.publish()
 		except Exception:
@@ -61,7 +61,7 @@ class RedditPost:
 					return match.group(1).upper()
 
 				return re.sub(
-					r"(?:^|(?<=[\n\r]))#+[ \t]*(.*?[\n\r])", transform_title, text
+					r"(?:^|(?<=[\n\r]))#+[ \t]*([^\n\r]*[\n\r])", transform_title, text
 				)
 
 			def format_spoilers(text):

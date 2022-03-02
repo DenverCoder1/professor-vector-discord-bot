@@ -1,6 +1,6 @@
 import traceback
 from discord import logging
-from discord.ext.commands import errors
+from nextcord.ext.commands import errors
 from datetime import datetime
 
 

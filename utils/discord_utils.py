@@ -22,18 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import discord
+import nextcord
 from typing import List
 
-def create_embed() -> discord.Embed:
+def create_embed() -> nextcord.Embed:
     """
     Create an empty discord embed with color.
-    :return: (discord.Embed)
+    :return: (nextcord.Embed)
     """
-    return discord.Embed(color=discord.Color.blurple())
+    return nextcord.Embed(color=nextcord.Color.blurple())
 
 
-def create_no_argument_embed(arg_name: str ='argument') -> discord.Embed:
+def create_no_argument_embed(arg_name: str ='argument') -> nextcord.Embed:
     """
     Create an embed which alerts the user they need to supply an argument
     :param arg_name: (str) The type of argument needed (e.g. channel)
@@ -43,9 +43,9 @@ def create_no_argument_embed(arg_name: str ='argument') -> discord.Embed:
     return embed
 
 
-def populate_embed(names: list, values: list, inline: bool = False) -> discord.Embed:
+def populate_embed(names: list, values: list, inline: bool = False) -> nextcord.Embed:
     """Populate an embed with a list of names and values"""
-    embed = discord.Embed(color=discord.Color.blurple())
+    embed = nextcord.Embed(color=nextcord.Color.blurple())
     for idx in range(len(names)):
         embed.add_field(name=names[idx],
                         value=values[idx],
@@ -54,7 +54,7 @@ def populate_embed(names: list, values: list, inline: bool = False) -> discord.E
 
 
 def find_channel(bot, channels, channel_name):
-    channel = discord.utils.get(channels, name=channel_name)
+    channel = nextcord.utils.get(channels, name=channel_name)
 
     if channel is None:
         channel_id = int(channel_name.replace('>', '').replace('<#', ''))
@@ -62,38 +62,38 @@ def find_channel(bot, channels, channel_name):
     return channel
 
 
-def category_is_full(category: discord.CategoryChannel) -> bool:
+def category_is_full(category: nextcord.CategoryChannel) -> bool:
     """Determines whether a category is full (has 50 channels)"""
     return len(category.channels) >= 50
 
 
-async def createchannelgeneric(guild, category, name) -> discord.TextChannel:
+async def createchannelgeneric(guild, category, name) -> nextcord.TextChannel:
     """Command to create channel in same category with given name
     Arguments:
-        - guild (discord.Guild): the guild the channel is being created in
-        - category (discord.CategoryChannel): the category the channel is being created in
+        - guild (nextcord.Guild): the guild the channel is being created in
+        - category (nextcord.CategoryChannel): the category the channel is being created in
         - name (str): the name for the channel
     Returns:
-        - channel (discord.TextChannel): The created channel, or none if the bot does not have sufficient perms.
+        - channel (nextcord.TextChannel): The created channel, or none if the bot does not have sufficient perms.
     """
     try:
         # create channel
         channel = await guild.create_text_channel(name, category=category)
-    except discord.Forbidden:
+    except nextcord.Forbidden:
         return None
 
     return channel
 
 
 # TODO: I'm going to need to rewriter this at some point...
-def split_embed(embed: discord.Embed) -> List[discord.Embed]:
+def split_embed(embed: nextcord.Embed) -> List[nextcord.Embed]:
     """Splits embeds that are too long (discord character limit)
     Arguments:
-        - embed (discord.Embed)
+        - embed (nextcord.Embed)
     Returns
-        - embed_list (List[discord.Embed]):
+        - embed_list (List[nextcord.Embed]):
     """
-    if embed.title == discord.Embed.Empty:
+    if embed.title == nextcord.Embed.Empty:
         embed.title = ""
     EMBED_CHARACTER_LIMIT = 2000
     FIELD_CHARACTER_LIMIT = 1024
@@ -105,7 +105,7 @@ def split_embed(embed: discord.Embed) -> List[discord.Embed]:
         characters_remaining = character_count
         description = embed.description
         while description != "":
-            embed_list.append(discord.Embed(title=embed.title + " (continued)" if len(embed_list) > 0 else embed.title,
+            embed_list.append(nextcord.Embed(title=embed.title + " (continued)" if len(embed_list) > 0 else embed.title,
                                             color=embed.color))
             # Find the point that is closest to the cutoff but with a space.
             cutoff_point = description[:(EMBED_CHARACTER_LIMIT - len(embed.title))].rfind(' ')
@@ -116,7 +116,7 @@ def split_embed(embed: discord.Embed) -> List[discord.Embed]:
             characters_remaining -= cutoff_point
     # If the title + description are small, we can just copy them over
     else:
-        embed_list.append(discord.Embed(title=embed.title,
+        embed_list.append(nextcord.Embed(title=embed.title,
                                         description=embed.description,
                                         color=embed.color))
     character_count = len(embed_list[-1].title) + len(embed_list[-1].description)
@@ -148,7 +148,7 @@ def split_embed(embed: discord.Embed) -> List[discord.Embed]:
                 field_character_count -= cutoff_point
                 field_description = field_description[cutoff_point+1:]
                 # We just filled the entire embed up, so now we need to make a new one
-                embed_list.append(discord.Embed(title=embed.title + " (continued)",
+                embed_list.append(nextcord.Embed(title=embed.title + " (continued)",
                                                 color=embed.color))
                 character_count = len(embed_list[-1].title)
         # Once we've gotten to here, we know that the remaining field character count is able to fit in one field.
@@ -160,7 +160,7 @@ def split_embed(embed: discord.Embed) -> List[discord.Embed]:
             embed_list[-1].add_field(name=field.name,
                                      value=field_description[:cutoff_point+1],
                                      inline=False)
-            embed_list.append(discord.Embed(title=embed.title + " (continued)",
+            embed_list.append(nextcord.Embed(title=embed.title + " (continued)",
                                             color=embed.color))
             field_description = field_description[cutoff_point+1:]
             character_count = len(embed_list[-1].title) + len(field.name)
