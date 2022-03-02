@@ -9,20 +9,20 @@ class NewHelpCommand(commands.MinimalHelpCommand):
 
 	def get_ending_note(self):
 		"""Returns note to display at the bottom"""
-		prefix = self.clean_prefix
+		prefix = self.context.clean_prefix
 		invoked_with = self.invoked_with
 		return f"Use {prefix}{invoked_with} [command] for more info on a command."
 
-	def get_command_signature(self, command: commands.core.Command):
+	def get_command_signature(self, command: commands.Command):
 		"""Retrieves the signature portion of the help page."""
 		return f"{command.qualified_name} {command.signature}"
 
 	async def send_bot_help(self, mapping: dict):
 		"""implements bot command help page"""
-		prefix = self.clean_prefix
+		prefix = self.context.clean_prefix
 		embed = discord.Embed(title="Bot Commands", colour=self.COLOUR)
 		embed.set_author(
-			name=self.context.bot.user.name, icon_url=self.context.bot.user.avatar_url
+			name=self.context.bot.user.name, icon_url=self.context.bot.user.display_avatar.url
 		)
 		description = self.context.bot.description
 		if description:
