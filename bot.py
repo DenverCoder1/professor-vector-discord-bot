@@ -10,6 +10,7 @@ def main():
 	intents = nextcord.Intents.default()
 	intents.guilds = True
 	intents.members = True
+	intents.message_content = True
 
 	client = commands.Bot(config.BOT_PREFIX, intents=intents)
 
