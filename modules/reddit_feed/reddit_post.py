@@ -1,14 +1,17 @@
-import config
-import re
 import datetime
+import re
+
+import config
 import nextcord
-from table2ascii import table2ascii, Alignment
+from table2ascii import Alignment, table2ascii
+from utils.embedder import build_embed
 
 
 class RedditPost:
 	def __init__(self, bot, post):
 		self.bot = bot
 		self.post = post
+		self.post_url = f"https://redd.it/{post.id}"
 
 	async def process_post(self):
 		"""check post and announce if not saved"""
@@ -23,10 +26,8 @@ class RedditPost:
 
 	async def __announce(self, title: str, description: str):
 		"""send message in announcements channel"""
-		channel: nextcord.TextChannel = self.bot.get_channel(
-			config.ANNOUNCEMENTS_CHANNEL_ID
-		)
-		embed = nextcord.Embed(title=title, description=description)
+		channel: nextcord.TextChannel = self.bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
+		embed = build_embed(title, description, url=self.post_url)
 		message: nextcord.Message = await channel.send(embed=embed)
 		try:
 			await message.publish()
@@ -60,9 +61,7 @@ class RedditPost:
 					"""transform matched group to uppercase"""
 					return match.group(1).upper()
 
-				return re.sub(
-					r"(?:^|(?<=[\n\r]))#+[ \t]*([^\n\r]*[\n\r])", transform_title, text
-				)
+				return re.sub(r"(?:^|(?<=[\n\r]))#+[ \t]*([^\n\r]*[\n\r])", transform_title, text)
 
 			def format_spoilers(text):
 				"""substitute spoilers like `>!spoiler!<` with `||spoiler||`"""
@@ -144,9 +143,8 @@ class RedditPost:
 		# get url and selftext
 		emoji = self.__get_emoji()
 		title = self.post.title
-		url = f"https://redd.it/{self.post.id}"
 		selftext = self.__format_selftext()
 		# create the message
 		title = f"{emoji}  |  **{title}**"
-		message = f"{url}\n\n{selftext}"
+		message = f"{self.post_url}\n\n{selftext}"
 		return title, message
