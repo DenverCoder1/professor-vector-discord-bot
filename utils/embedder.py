@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 import nextcord
-from nextcord.embeds import EmptyEmbed, _EmptyEmbed
 
 DEFAULT_COLOR = nextcord.Colour.blurple()
 MAX_EMBED_DESCRIPTION_LENGTH = 4096
@@ -19,7 +18,7 @@ def embed_success(
 	title: str,
 	description: Optional[str] = None,
 	footer: Optional[str] = None,
-	url: Union[str, _EmptyEmbed] = EmptyEmbed,
+	url: Optional[str] = None,
 	image: Optional[str] = None,
 	thumbnail: Optional[str] = None,
 	timestamp: Optional[datetime] = None,
@@ -34,7 +33,7 @@ def embed_warning(
 	title: str,
 	description: Optional[str] = None,
 	footer: Optional[str] = None,
-	url: Union[str, _EmptyEmbed] = EmptyEmbed,
+	url: Optional[str] = None,
 	image: Optional[str] = None,
 	thumbnail: Optional[str] = None,
 	timestamp: Optional[datetime] = None,
@@ -49,7 +48,7 @@ def embed_error(
 	title: str,
 	description: Optional[str] = None,
 	footer: Optional[str] = None,
-	url: Union[str, _EmptyEmbed] = EmptyEmbed,
+	url: Optional[str] = None,
 	image: Optional[str] = None,
 	thumbnail: Optional[str] = None,
 	timestamp: Optional[datetime] = None,
@@ -64,7 +63,7 @@ def build_embed(
 	title: str,
 	description: Optional[str] = None,
 	footer: Optional[str] = None,
-	url: Union[str, _EmptyEmbed] = EmptyEmbed,
+	url: Optional[str] = None,
 	colour: nextcord.Colour = DEFAULT_COLOR,
 	image: Optional[str] = None,
 	thumbnail: Optional[str] = None,
