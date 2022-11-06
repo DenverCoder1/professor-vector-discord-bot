@@ -24,6 +24,6 @@ The countdown is activated by including a date enclosed in `!!` within a message
 
 ## 🧑‍💼 Commands (Admin only)
 
-`!resend` - resend the last announcement (in case changes have been made)
+`!resend [message-id]` - resend the last announcement (in case changes have been made), optionally edit an existing message.
 
 `!lockcategory <category-name>` - Lock `@everyone` from writing in a given category

@@ -1,5 +1,6 @@
 import datetime
 import re
+from typing import Optional
 
 import config
 import nextcord
@@ -13,16 +14,22 @@ class RedditPost:
 		self.post = post
 		self.post_url = f"https://redd.it/{post.id}"
 
-	async def process_post(self):
+	async def process_post(self, message_id: Optional[int] = None):
 		"""check post and announce if not saved"""
 		# log post details in console
 		print(f"Recieved post by {self.post.author} at {self.__get_date()}")
 		# create message with url and text
 		title, message = self.__build_message()
-		# send to discord announcements
-		await self.__announce(title, message)
-		# log announcement status in console
-		print(f"Sent announcement.")
+		if not message_id:
+			# send to discord announcements
+			await self.__announce(title, message)
+			# log announcement status in console
+			print(f"Sent announcement.")
+		else:
+			# edit announcement
+			await self.__edit_announcement(title, message, message_id)
+			# log announcement status in console
+			print(f"Edited announcement.")
 
 	async def __announce(self, title: str, description: str):
 		"""send message in announcements channel"""
@@ -33,6 +40,13 @@ class RedditPost:
 			await message.publish()
 		except Exception:
 			pass
+
+	async def __edit_announcement(self, title: str, description: str, message_id: int):
+		"""edit message in announcements channel"""
+		channel: nextcord.TextChannel = self.bot.get_channel(config.ANNOUNCEMENTS_CHANNEL_ID)
+		message: nextcord.Message = await channel.fetch_message(message_id)
+		embed = build_embed(title, description, url=self.post_url)
+		await message.edit(embed=embed)
 
 	def __get_date(self):
 		"""convert post date to readable timestamp"""
