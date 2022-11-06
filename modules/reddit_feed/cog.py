@@ -1,5 +1,6 @@
 import datetime
 import time
+from typing import Optional
 
 from nextcord.ext.tasks import loop
 from nextcord.ext import commands
@@ -48,7 +49,7 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 	@commands.command(name="resend")
 	@commands.has_permissions(administrator=True)
 	@is_in_guild(config.GUILD_ID)
-	async def resend(self, ctx):
+	async def resend(self, ctx: commands.Context, message_id: Optional[int] = None):
 		"""Command to resend the last post again.
 		Invoked with !resend"""
 		# log command in console
@@ -59,7 +60,7 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 		subreddit = await reddit.subreddit(config.SUB)
 		async for submission in subreddit.new(limit=1):
 			# process submission
-			await RedditPost(self.bot, submission).process_post()
+			await RedditPost(self.bot, submission).process_post(message_id)
 
 	@loop(seconds=CHECK_INTERVAL)
 	async def reddit_feed(self):
