@@ -109,27 +109,71 @@ class RedditPost:
 		def format_results_post(post):
 			"""tabulate points in results post and trim"""
 			selftext = post.selftext
-			# find points in post text
-			points_match = re.findall(
-				r"\w.*?(\d*)\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|\**(\d+?)\**\|",
-				post.selftext,
-			)
-			if points_match:
-				# create unicode table
-				table = table2ascii(
-					header=["#", "G", "H", "R", "S"],
-					body=points_match[0:-1],
-					footer=["SUM"] + list(points_match[-1][1:]),
-					first_col_heading=True,
-					alignments=[Alignment.CENTER] + [Alignment.RIGHT] * 4,
-				)
-				# replace markdown table
-				selftext = re.sub(
-					r"\*\*Level\*\*\|(?:.|\n)*? Points\|.*\n+",
-					"```ml\n" + table + "\n```\n",
+			# replace markdown table with ascii tables
+			table_replacement_string = ""
+			table_regex = r"(?:^\s*([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|\s*)+"
+			while re.search(table_regex, selftext, re.MULTILINE):
+				# find points in post text
+				points_match = re.findall(
+					r"^\s*([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|",
 					selftext,
+					re.MULTILINE,
 				)
-				selftext = re.sub("# Current Points ", "\n# Current Points ", selftext)
+				if points_match:
+					points_table_data = []
+					# cell subtitutions
+					substitutions = {
+						"Level": "#",
+						"Gryffindor": "G",
+						"Hufflepuff": "H",
+						"Ravenclaw": "R",
+						"Slytherin": "S",
+						"Puzzle 1": "1",
+						"Puzzle 2": "2",
+						"Puzzle 3": "3",
+						"Puzzle 4": "4",
+						"Puzzle 5": "5",
+						"Arithmancy Points": "SUM",
+						"House": "",
+						"House Points": "HPs",
+					}
+					for row in points_match:
+						# strip and remove "**" from each cell
+						row = [cell.strip().replace("**", "") for cell in row]
+						# replace cell values with substitutions
+						row = [substitutions.get(cell, cell) for cell in row]
+						# if the row contains :-:, don't add it to the table
+						if ":-:" in row:
+							continue
+						points_table_data.append(row)
+						# if the row contains "SUM", break the loop
+						if "SUM" in row:
+							break
+					header = points_table_data[0]
+					body = (
+						points_table_data[1:-1]
+						if len(points_table_data) > 2
+						else points_table_data[1:]
+					)
+					footer = points_table_data[-1] if len(points_table_data) > 2 else None
+					# create unicode table
+					table = table2ascii(
+						header=header,
+						body=body,
+						footer=footer,
+						first_col_heading=True,
+						alignments=[Alignment.CENTER] + [Alignment.RIGHT] * 4,
+					)
+					table_replacement_string += f"```ml\n" + table + "\n```\n"
+					selftext = re.sub(
+						table_regex,
+						"[[[TABLE_REPLACEMENT]]]",
+						selftext,
+						flags=re.MULTILINE,
+						count=1,
+					)
+			# replace markdown tables
+			selftext = selftext.replace("[[[TABLE_REPLACEMENT]]]", table_replacement_string)
 			# trim text if over limit of characters
 			trim_length = max(600, selftext.find("Level Results"))
 			selftext = trim_text(selftext, trim_length)
