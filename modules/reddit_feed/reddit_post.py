@@ -165,13 +165,13 @@ class RedditPost:
 						alignments=[Alignment.CENTER] + [Alignment.RIGHT] * 4,
 					)
 					table_replacement_string += f"```ml\n" + table + "\n```\n"
-					selftext = re.sub(
-						table_regex,
-						"[[[TABLE_REPLACEMENT]]]",
-						selftext,
-						flags=re.MULTILINE,
-						count=1,
-					)
+				selftext = re.sub(
+					table_regex,
+					"[[[TABLE_REPLACEMENT]]]",
+					selftext,
+					flags=re.MULTILINE,
+					count=1,
+				)
 			# replace markdown tables
 			selftext = selftext.replace("[[[TABLE_REPLACEMENT]]]", table_replacement_string)
 			# trim text if over limit of characters
