@@ -43,6 +43,8 @@ class Countdown(commands.Cog, name="Countdown"):
             self.__message = await create_countdown(message)
             if not self.countdown.is_running():
                 self.countdown.start()
+            else:
+                self.countdown.restart()
 
     @loop(seconds=30)
     async def countdown(self):
