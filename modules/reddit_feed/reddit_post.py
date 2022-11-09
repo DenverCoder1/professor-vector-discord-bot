@@ -109,6 +109,10 @@ class RedditPost:
 		def format_results_post(post):
 			"""tabulate points in results post and trim"""
 			selftext = post.selftext
+
+			# replace any \r with or without \n with \n
+			selftext = re.sub(r"\r\n?", "\n", selftext)
+
 			# replace markdown table with ascii tables
 			table_replacement_string = ""
 			table_regex = r"(?:^\s*([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\|\s*)+"
@@ -149,22 +153,23 @@ class RedditPost:
 						# if the row contains "SUM", break the loop
 						if "SUM" in row:
 							break
-					header = points_table_data[0]
-					body = (
-						points_table_data[1:-1]
-						if len(points_table_data) > 2
-						else points_table_data[1:]
-					)
-					footer = points_table_data[-1] if len(points_table_data) > 2 else None
-					# create unicode table
-					table = table2ascii(
-						header=header,
-						body=body,
-						footer=footer,
-						first_col_heading=True,
-						alignments=[Alignment.CENTER] + [Alignment.RIGHT] * 4,
-					)
-					table_replacement_string += f"```ml\n" + table + "\n```\n"
+					if len(points_table_data) > 0:
+						header = points_table_data[0]
+						body = (
+							points_table_data[1:-1]
+							if len(points_table_data) > 2
+							else points_table_data[1:]
+						)
+						footer = points_table_data[-1] if len(points_table_data) > 2 else None
+						# create unicode table
+						table = table2ascii(
+							header=header,
+							body=body,
+							footer=footer,
+							first_col_heading=True,
+							alignments=[Alignment.CENTER] + [Alignment.RIGHT] * 4,
+						)
+						table_replacement_string += f"```ml\n" + table + "\n```\n"
 				selftext = re.sub(
 					table_regex,
 					"[[[TABLE_REPLACEMENT]]]",
