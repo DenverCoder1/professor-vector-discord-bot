@@ -3,5 +3,5 @@ asyncpraw==7.6.1
 asyncprawcore==2.3.0
 python-dotenv==0.21.0
 table2ascii==1.0.3
-pytz==2022.6
+pytz==2022.7
 dateparser==1.1.4
