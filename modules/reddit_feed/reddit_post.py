@@ -68,20 +68,11 @@ class RedditPost:
 		def format_markdown(text):
 			"""apply replacements to markdown for better Discord readability"""
 
-			def format_headings(text):
-				"""substitute headings like `### title` with TITLE"""
-
-				def transform_title(match):
-					"""transform matched group to uppercase"""
-					return match.group(1).upper()
-
-				return re.sub(r"(?:^|(?<=[\n\r]))#+[ \t]*([^\n\r]*[\n\r])", transform_title, text)
-
 			def format_spoilers(text):
 				"""substitute spoilers like `>!spoiler!<` with `||spoiler||`"""
 				return re.sub(r">!((?:.|\s)*?)(?:!<|$)", r"||\1||", text)
 
-			return format_spoilers(format_headings(text))
+			return format_spoilers(text)
 
 		def trim_text(text, limit=600):
 			"""trim text if over limit of characters"""
