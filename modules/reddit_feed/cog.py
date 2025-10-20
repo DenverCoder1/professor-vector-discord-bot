@@ -77,7 +77,7 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 				):
 					# save post to mark as seen
 					await submission.save()
-					# process submissions
+					# process submission
 					await RedditPost(self.bot, submission).process_post()
 		except AsyncPrawcoreException as err:
 			print(f"EXCEPTION: AsyncPrawcoreException. {err}")
