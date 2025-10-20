@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import time
 from typing import Optional
@@ -69,15 +70,18 @@ class RedditFeedCog(commands.Cog, name="Reddit Feed"):
 			# check for new submission in subreddit
 			subreddit = await reddit.subreddit(config.SUB)
 			async for submission in subreddit.new(limit=SUBMISSION_LIMIT):
-				# check if the post has been seen before
-				if not submission.saved:
+				# check that the post hasn't been seen before and is from within the past week
+				if (
+					not submission.saved
+					and submission.created_utc > time.time() - 604800
+				):
 					# save post to mark as seen
 					await submission.save()
 					# process submission
 					await RedditPost(self.bot, submission).process_post()
 		except AsyncPrawcoreException as err:
 			print(f"EXCEPTION: AsyncPrawcoreException. {err}")
-			time.sleep(10)
+			await asyncio.sleep(10)
 
 	@reddit_feed.before_loop
 	async def reddit_feed_init(self):
